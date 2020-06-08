@@ -1,9 +1,5 @@
 tcga_build_features_files <- function() {
 
-  cat_features_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
-
   get_features <- function() {
     create_global_synapse_connection()
     cat(crayon::magenta(paste0("Get features")), fill = TRUE)
@@ -65,7 +61,7 @@ tcga_build_features_files <- function() {
 
   .GlobalEnv$features <- iatlas.data::synapse_store_feather_file(
     get_features(),
-    "features.feather",
+    "tcga_features.feather",
     "syn22125617"
   )
 
