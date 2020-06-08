@@ -15,13 +15,6 @@ tcga_build_features_files <- function() {
       dplyr::select("origin" = "Feature Origin", "method_tag" = "Methods Tag") %>%
       tidyr::drop_na()
 
-
-    features_old <- "feather_files/features" %>%
-      list.files(full.names = T, pattern = "^features") %>%
-      purrr::map(feather::read_feather) %>%
-      dplyr::bind_rows() %>%
-      dplyr::arrange(name)
-
     features <- "syn22128265" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
