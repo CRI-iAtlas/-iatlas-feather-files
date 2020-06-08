@@ -1,21 +1,16 @@
 tcga_build_ecn_nodes_files <- function() {
 
-  cat_ecn_nodes_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
-
   get_nodes <- function() {
 
     cat(crayon::magenta(paste0("Get TCGA nodes.")), fill = TRUE)
-    cat_ecn_nodes_status("Get the initial values from Synapse.")
 
     cytokine_nodes <-
       iatlas.data::get_tcga_cytokine_nodes_cached() %>%
-      dplyr::mutate("network" = "cytokine")
+      dplyr::mutate("network" = "extracellular_network")
 
     cellimage_nodes <-
       iatlas.data::get_tcga_cellimage_nodes_cached() %>%
-      dplyr::mutate("network" = "cellimage")
+      dplyr::mutate("network" = "cellimage_network")
 
     nodes <-
       dplyr::bind_rows(cytokine_nodes, cellimage_nodes) %>%
