@@ -14,8 +14,8 @@ pcawg_build_tags_files <- function() {
       dplyr::filter(!stringr::str_detect(name, "C[:digit:]")) %>%
       dplyr::filter(name != "PCAWG") %>%
       dplyr::mutate("display" = name, "type" = "group") %>%
-      dplyr::add_row(name = "PCAWG", display = "PCAWG", type = "dataset") %>%
-      dplyr::add_row(name = "PCAWG_Study", display = "PCAWG Study", type = "parent group") %>%
+      dplyr::add_row(name = "PCAWG", display = "PCAWG") %>%
+      dplyr::add_row(name = "PCAWG_Study", display = "PCAWG Study") %>%
       dplyr::arrange(name)
 
     return(tags)

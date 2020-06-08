@@ -4,12 +4,6 @@ tcga_build_tags_files <- function() {
 
   get_tags <- function() {
 
-    old <- "feather_files/tags/" %>%
-      list.files(full.names = T, pattern = "^tags") %>%
-      purrr::map(feather::read_feather) %>%
-      dplyr::bind_rows() %>%
-      dplyr::arrange(name)
-
     all_tags <- "syn22140514" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
@@ -21,8 +15,7 @@ tcga_build_tags_files <- function() {
         "characteristics" = "Characteristics",
         "display" = "FeatureName" ,
         "color" = "FeatureHex"
-      ) %>%
-      dplyr::mutate("type" = "group")
+      )
 
     tags2 <- all_tags %>%
       dplyr::filter(sample_group == "Subtype_Curated_Malta_Noushmehr_et_al") %>%
@@ -32,8 +25,7 @@ tcga_build_tags_files <- function() {
       ) %>%
       dplyr::distinct() %>%
       dplyr::mutate(
-        "name" = paste0(name, " Subtypes"),
-        "type" = "metagroup"
+        "name" = paste0(name, " Subtypes")
       )
 
     tags <-
@@ -41,12 +33,14 @@ tcga_build_tags_files <- function() {
       dplyr::add_row(
         "name" = c("TCGA", "Immune_Subtype", "TCGA_Subtype", "TCGA_Study"),
         "display" = c("TCGA", "Immune Subtype", "TCGA Subtype", "TCGA Study"),
-        "type" = c("dataset", "parent group", "parent group", "parent group")
       ) %>%
       dplyr::add_row(
         "name" = c("extracellular_network", "cellimage_network"),
-        "display" = c("Extracellular Network", "Cellimage Network"),
-        "type" = c("network", "network")
+        "display" = c("Extracellular Network", "Cellimage Network")
+      ) %>%
+      dplyr::add_row(
+        "name" = c("dataset", "parent_group", "metagroup", "group", "network"),
+        "display" = c("Dataset", "Parent Group", "Metagroup", "Group", "Network")
       ) %>%
       dplyr::arrange(name)
 

@@ -26,7 +26,17 @@ tcga_build_tags_to_tags_files <- function() {
         )
       )
 
-    tags2 <- all_tags %>%
+    tags2 <- tags1 %>%
+      dplyr::select("tag") %>%
+      dplyr::mutate("related_tag" = "group")
+
+    tags3 <- tags1 %>%
+      dplyr::select("tag" = "related_tag") %>%
+      dplyr::distinct() %>%
+      dplyr::mutate("related_tag" = "parent_group")
+
+
+    tags4 <- all_tags %>%
       dplyr::filter(sample_group == "Subtype_Curated_Malta_Noushmehr_et_al") %>%
       dplyr::select(
         "tag" = "FeatureValue",
@@ -34,12 +44,23 @@ tcga_build_tags_to_tags_files <- function() {
       ) %>%
       dplyr::mutate("related_tag" = paste0(related_tag, " Subtypes"))
 
-    tags_to_tags <-
-      dplyr::bind_rows(tags1, tags2) %>%
-      dplyr::add_row(
-        "tag" = c("Immune_Subtype", "TCGA_Subtype", "TCGA_Study"),
-        "related_tag" = c("TCGA", "TCGA", "TCGA")
-      )
+    tags5 <- tags4 %>%
+      dplyr::select("tag" = "related_tag") %>%
+      dplyr::distinct() %>%
+      dplyr::mutate("related_tag" = "metagroup")
+
+    tags6 <- dplyr::tribble(
+      ~tag,                    ~related_tag,
+      "TCGA",                  "dataset",
+      "extracellular_network", "network",
+      "cellimage_network",     "network",
+      "Immune_Subtype",        "TCGA",
+      "TCGA_Subtype",          "TCGA",
+      "TCGA_Study",            "TCGA"
+
+    )
+
+    tags_to_tags <- dplyr::bind_rows(tags1, tags2, tags3, tags4, tags5, tags6)
 
     return(tags_to_tags)
   }
