@@ -1,35 +1,35 @@
 tcga_build_mutation_codes_files <- function() {
-  default_mutation_code <- "(NS)"
-
-  cat_mutation_codes_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
 
   get_codes <- function() {
     cat(crayon::magenta(paste0("Get mutation_codes.")), fill = TRUE)
 
-    cat_mutation_codes_status("Import driver mutation feather files.")
-    driver_mutations <- iatlas.data::get_tcga_driver_mutation_genes()
+    create_global_synapse_connection()
 
-    cat_mutation_codes_status("Building mutation_codes data.")
-    mutation_codes <- driver_mutations %>%
-      dplyr::distinct(hgnc) %>%
-      dplyr::mutate(code = ifelse(!is.na(hgnc), iatlas.data::old_get_mutation_code(hgnc), NA)) %>%
-      dplyr::filter(!is.na(code)) %>%
-      dplyr::add_row(code = default_mutation_code)
-
-    cat_mutation_codes_status("Clean up the data set.")
-    mutation_codes <- mutation_codes %>%
-      dplyr::distinct(code) %>%
-      dplyr::filter(!is.na(code)) %>%
+    mutation_codes <- "syn22131029" %>%
+      .GlobalEnv$synapse$get() %>%
+      purrr::pluck("path") %>%
+      feather::read_feather(.) %>%
+      dplyr::select(-"ParticipantBarcode") %>%
+      colnames() %>%
+      unique() %>%
+      dplyr::tibble("code" = .) %>%
+      tidyr::separate(
+        "code", into = c("gene", "code"), sep = " ", fill = "right"
+      ) %>%
+      dplyr::select("code") %>%
+      dplyr::distinct() %>%
+      tidyr::drop_na() %>%
+      dplyr::add_row("code" = "(NS)") %>%
       dplyr::arrange(code)
 
     return(mutation_codes)
   }
 
-  # Setting these to the GlobalEnv just for development purposes.
-  .GlobalEnv$tcga_mutation_codes <- get_codes() %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/mutation_codes/tcga_mutation_codes.feather"))
+  .GlobalEnv$tcga_mutation_codes <- iatlas.data::synapse_store_feather_file(
+    get_codes(),
+    "tcga_mutation_codes.feather",
+    "syn22131021"
+  )
 
   ### Clean up ###
   rm(tcga_mutation_codes, pos = ".GlobalEnv")

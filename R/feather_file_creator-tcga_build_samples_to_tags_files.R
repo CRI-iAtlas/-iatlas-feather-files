@@ -1,86 +1,38 @@
 tcga_build_samples_to_tags_files <- function() {
-  # Create a global variable to hold the pool DB connection.
-  .GlobalEnv$pool <- iatlas.data::connect_to_db()
-  cat(crayon::green("Created DB connection."), fill = TRUE)
 
-  cat_samples_to_tags_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
+  iatlas.data::create_global_synapse_connection()
 
   get_samples_to_tags <- function() {
-    current_pool <- pool::poolCheckout(.GlobalEnv$pool)
 
-    cat(crayon::magenta(paste0("Get samples_to_tags.")), fill = TRUE)
-
-    cat_samples_to_tags_status("Get the initial values from the samples_to_tags table.")
-    samples_to_tags <- current_pool %>% dplyr::tbl("samples_to_tags")
-
-    cat_samples_to_tags_status("Get the tag names for the samples by tag id.")
-    samples_to_tags <- samples_to_tags %>% dplyr::left_join(
-      current_pool %>% dplyr::tbl("tags") %>%
-        dplyr::select(id, tag = name),
-      by = c("tag_id" = "id")
-    )
-
-    cat_samples_to_tags_status("Get the samples from the samples table")
-    samples <- current_pool %>% dplyr::tbl("samples") %>%
-      dplyr::select(sample_id = id, sample = name)
-
-    cat_samples_to_tags_status("Get the sample names.")
-    samples_to_tags <- samples_to_tags %>% dplyr::left_join(
-      samples,
-      by = "sample_id"
-    )
-
-    cat_samples_to_tags_status("Clean up the data set.")
-    samples_to_tags <- samples_to_tags %>%
-      dplyr::distinct(sample, tag) %>%
+    samples_to_tags <- "syn22128019" %>%
+      .GlobalEnv$synapse$get() %>%
+      purrr::pluck("path") %>%
+      feather::read_feather(.) %>%
+      dplyr::select(
+        "sample" = "ParticipantBarcode",
+        "Study",
+        "Subtype_Immune_Model_Based",
+        "Subtype_Curated_Malta_Noushmehr_et_al"
+      ) %>%
+      dplyr::mutate("dataset" = "TCGA") %>%
+      tidyr::pivot_longer(-"sample", values_to = "tag") %>%
+      tidyr::drop_na() %>%
+      dplyr::select("sample", "tag") %>%
       dplyr::arrange(sample, tag)
-
-    cat_samples_to_tags_status("Execute the query and return a tibble.")
-    samples_to_tags <- samples_to_tags %>% dplyr::as_tibble()
-
-    cat_samples_to_tags_status("Ensure the samples are tagged 'TCGA'.")
-    samples <- samples %>%
-      dplyr::as_tibble() %>%
-      dplyr::mutate(tag = "TCGA") %>%
-      dplyr::select(sample, tag)
-    samples_to_tags <- samples_to_tags %>% dplyr::bind_rows(samples)
-
-    cat_samples_to_tags_status("Clean up the data set.")
-    samples_to_tags <- samples_to_tags %>%
-      dplyr::distinct(sample, tag) %>%
-      dplyr::arrange(sample, tag)
-
-    pool::poolReturn(current_pool)
 
     return(samples_to_tags)
   }
 
-  all_samples_to_tags <- get_samples_to_tags()
-  all_samples_to_tags <- all_samples_to_tags %>%
-    split(rep(1:3, each = ceiling(length(all_samples_to_tags)/2.5)))
+  .GlobalEnv$tcga_samples_to_tags <- iatlas.data::synapse_store_feather_file(
+    get_samples_to_tags(),
+    "tcga_samples_to_tags.feather",
+    "syn22125729"
+  )
 
-  # Setting these to the GlobalEnv just for development purposes.
-  .GlobalEnv$samples_to_tags_01 <- all_samples_to_tags %>% .[[1]] %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/relationships/samples_to_tags/samples_to_tags_01.feather"))
-
-  .GlobalEnv$samples_to_tags_02 <- all_samples_to_tags %>% .[[2]] %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/relationships/samples_to_tags/samples_to_tags_02.feather"))
-
-  .GlobalEnv$samples_to_tags_03 <- all_samples_to_tags %>% .[[3]] %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/relationships/samples_to_tags/samples_to_tags_03.feather"))
-
-  # Close the database connection.
-  pool::poolClose(.GlobalEnv$pool)
-  cat(crayon::green("Closed DB connection."), fill = TRUE)
 
   ### Clean up ###
   # Data
-  rm(pool, pos = ".GlobalEnv")
-  rm(samples_to_tags_01, pos = ".GlobalEnv")
-  rm(samples_to_tags_02, pos = ".GlobalEnv")
-  rm(samples_to_tags_03, pos = ".GlobalEnv")
+  rm(tcga_samples_to_tags, pos = ".GlobalEnv")
   cat("Cleaned up.", fill = TRUE)
   gc()
 }

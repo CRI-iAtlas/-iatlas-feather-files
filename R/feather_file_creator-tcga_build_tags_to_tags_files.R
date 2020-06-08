@@ -1,81 +1,58 @@
 tcga_build_tags_to_tags_files <- function() {
-  # Create a global variable to hold the pool DB connection.
-  .GlobalEnv$pool <- iatlas.data::connect_to_db()
-  cat(crayon::green("Created DB connection."), fill = TRUE)
 
-  cat_tags_to_tags_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
+  iatlas.data::create_global_synapse_connection()
 
   get_tags_to_tags <- function() {
-    current_pool <- pool::poolCheckout(.GlobalEnv$pool)
 
-    cat(crayon::magenta(paste0("Get tags_to_tags.")), fill = TRUE)
+    all_tags <- "syn22140514" %>%
+      .GlobalEnv$synapse$get() %>%
+      purrr::pluck("path") %>%
+      feather::read_feather(.)
 
-    cat_tags_to_tags_status("Get the initial values from the tags_to_tags table.")
-    tags_to_tags <- current_pool %>% dplyr::tbl("tags_to_tags")
+    tags1 <- all_tags %>%
+      dplyr::select(
+        "tag" = "FeatureValue",
+        "related_tag" = "sample_group"
+      ) %>%
+      dplyr::mutate(related_tag =
+        dplyr::if_else(
+          related_tag == "Study",
+          "TCGA_Study",
+          dplyr::if_else(
+            related_tag == "Subtype_Immune_Model_Based",
+            "Immune_Subtype",
+            "TCGA_Subtype"
+          )
+        )
+      )
 
-    cat_tags_to_tags_status("Get the tag names by tag id.")
-    tags_to_tags <- tags_to_tags %>% dplyr::left_join(
-      current_pool %>% dplyr::tbl("tags") %>%
-        dplyr::select(id, tag = name),
-      by = c("tag_id" = "id")
-    )
+    tags2 <- all_tags %>%
+      dplyr::filter(sample_group == "Subtype_Curated_Malta_Noushmehr_et_al") %>%
+      dplyr::select(
+        "tag" = "FeatureValue",
+        "related_tag" = "TCGA Studies"
+      ) %>%
+      dplyr::mutate("related_tag" = paste0(related_tag, " Subtypes"))
 
-    cat_tags_to_tags_status("Get the related tag names.")
-    tags_to_tags <- tags_to_tags %>% dplyr::left_join(
-      current_pool %>% dplyr::tbl("tags") %>%
-        dplyr::select(id, related_tag = name),
-      by = c("related_tag_id" = "id")
-    )
-
-    cat_tags_to_tags_status("Clean up the data set.")
-    tags_to_tags <- tags_to_tags %>%
-      dplyr::distinct(tag, related_tag) %>%
-      dplyr::arrange(tag, related_tag)
-
-    cat_tags_to_tags_status("Execute the query and return a tibble.")
-    tags_to_tags <- tags_to_tags %>% dplyr::as_tibble()
-
-    cat_tags_to_tags_status("Ensure TCGA_Study is tagged to TCGA.")
-    tags_to_tags <- tags_to_tags %>%
-      dplyr::add_row(tag = "TCGA_Study", related_tag = "TCGA") %>%
-      dplyr::add_row(tag = "TCGA_Subtype", related_tag = "TCGA") %>%
-      dplyr::add_row(tag = "Immune_Subtype", related_tag = "TCGA")
-
-    cat_tags_to_tags_status("Clean up the data set.")
-    tags_to_tags <- tags_to_tags %>%
-      dplyr::distinct(tag, related_tag) %>%
-      dplyr::arrange(tag, related_tag)
-
-    pool::poolReturn(current_pool)
+    tags_to_tags <-
+      dplyr::bind_rows(tags1, tags2) %>%
+      dplyr::add_row(
+        "tag" = c("Immune_Subtype", "TCGA_Subtype", "TCGA_Study"),
+        "related_tag" = c("TCGA", "TCGA", "TCGA")
+      )
 
     return(tags_to_tags)
   }
 
-  all_tags_to_tags <- get_tags_to_tags()
-  all_tags_to_tags <- all_tags_to_tags %>% split(rep(1:3, each = ceiling(length(all_tags_to_tags)/2.5)))
-
-  # Setting these to the GlobalEnv just for development purposes.
-  .GlobalEnv$tags_to_tags_01 <- all_tags_to_tags %>% .[[1]] %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/relationships/tags_to_tags/tags_to_tags_01.feather"))
-
-  .GlobalEnv$tags_to_tags_02 <- all_tags_to_tags %>% .[[2]] %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/relationships/tags_to_tags/tags_to_tags_02.feather"))
-
-  .GlobalEnv$tags_to_tags_03 <- all_tags_to_tags %>% .[[3]] %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/relationships/tags_to_tags/tags_to_tags_03.feather"))
-
-  # Close the database connection.
-  pool::poolClose(.GlobalEnv$pool)
-  cat(crayon::green("Closed DB connection."), fill = TRUE)
+  .GlobalEnv$tcga_tags_to_tags <- iatlas.data::synapse_store_feather_file(
+    get_tags_to_tags(),
+    "tcga_tags_to_tags.feather",
+    "syn22125980"
+  )
 
   ### Clean up ###
   # Data
-  rm(pool, pos = ".GlobalEnv")
-  rm(tags_to_tags_01, pos = ".GlobalEnv")
-  rm(tags_to_tags_02, pos = ".GlobalEnv")
-  rm(tags_to_tags_03, pos = ".GlobalEnv")
+  rm(tcga_tags_to_tags, pos = ".GlobalEnv")
   cat("Cleaned up.", fill = TRUE)
   gc()
 }

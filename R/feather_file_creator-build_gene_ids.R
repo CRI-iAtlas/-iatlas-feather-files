@@ -1,4 +1,5 @@
 build_gene_ids <- function() {
+  iatlas.data::create_global_synapse_connection()
   all_gene_ids <- .GlobalEnv$synapse$get("syn4976369") %>%
     purrr::pluck("path") %>%
     readr::read_tsv(.)

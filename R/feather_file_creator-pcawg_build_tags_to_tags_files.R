@@ -1,23 +1,16 @@
 pcawg_build_tags_to_tags_files <- function() {
 
-  cat_tags_to_tags_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
+  iatlas.data::create_global_synapse_connection()
 
   get_tags_to_tags <- function() {
 
     cat(crayon::magenta(paste0("Get pcawg tags_to_tags.")), fill = TRUE)
 
-    cat_tags_to_tags_status("Get PCAWG tags from Synapse.")
-    tags <- get_pcawg_tags_from_synapse() %>%
-      dplyr::select(immune_subtype = subtype, pcawg_study = dcc_project_code)
-
-    cat_tags_to_tags_status("Build tags_to_tags data.")
-    tags_to_tags <- dplyr::tibble(tag = "PCAWG_Study", related_tag = "PCAWG") %>%
-      dplyr::add_row(tag = "Immune_Subtype", related_tag = "PCAWG")
-    tags_to_tags <- tags %>% dplyr::distinct(tag = immune_subtype) %>% dplyr::mutate(related_tag = "Immune_Subtype") %>% dplyr::bind_rows(tags_to_tags)
-    tags_to_tags <- tags %>% dplyr::distinct(tag = pcawg_study) %>% dplyr::mutate(related_tag = "PCAWG_Study") %>% dplyr::bind_rows(tags_to_tags)
-
+    tags_to_tags <- get_pcawg_tags_from_synapse() %>%
+      dplyr::select(tag = dcc_project_code) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(related_tag = "PCAWG_Study") %>%
+      dplyr::add_row(tag = "PCAWG_Study", related_tag = "PCAWG")
     return(tags_to_tags)
   }
 

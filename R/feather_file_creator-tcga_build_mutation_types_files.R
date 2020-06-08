@@ -1,7 +1,5 @@
 tcga_build_mutation_types_files <- function() {
-  cat_mutation_types_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
+  create_global_synapse_connection()
 
   get_type <- function() {
     cat(crayon::magenta(paste0("Build tcga mutation types.")), fill = TRUE)
@@ -11,9 +9,11 @@ tcga_build_mutation_types_files <- function() {
     return(mutation_types)
   }
 
-  # Setting these to the GlobalEnv just for development purposes.
-  .GlobalEnv$driver_mutation <- get_type() %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/mutation_types/driver_mutation_mutation_type.feather"))
+  .GlobalEnv$driver_mutation <- iatlas.data::synapse_store_feather_file(
+    get_type(),
+    "driver_mutation_mutation_type.feather",
+    "syn22131052"
+  )
 
   ### Clean up ###
   # Data

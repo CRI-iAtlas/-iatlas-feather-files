@@ -16,8 +16,13 @@ tcga_build_gene_types_files <- function() {
   }
 
   # Setting these to the GlobalEnv just for development purposes.
-  .GlobalEnv$tcga_gene_types <- get_type() %>%
-    feather::write_feather(paste0(getwd(), "/feather_files/gene_types/tcga_gene_types.feather"))
+  create_global_synapse_connection()
+
+  .GlobalEnv$tcga_gene_types <- iatlas.data::synapse_store_feather_file(
+    get_type(),
+    "tcga_gene_types.feather",
+    "syn22130910"
+  )
 
   ### Clean up ###
   # Data
