@@ -5,18 +5,11 @@ tcag_build_driver_results_files <- function() {
   }
 
   get_results <- function() {
-    create_global_synapse_connection()
 
-    tcga_genes <- "syn22125607" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+    tcga_genes <- synapse_feather_id_to_tbl("syn22125607") %>%
       dplyr::filter(!is.na(hgnc))
 
-    new_genes <- "syn21788372" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      readr::read_tsv(.) %>%
+    new_genes <- synapse_dellimted_id_to_tbl("syn21788372") %>%
       dplyr::filter(!is.na(hgnc)) %>%
       dplyr::select("entrez", "hgnc")
 
@@ -27,9 +20,7 @@ tcag_build_driver_results_files <- function() {
       )
 
     driver_results <- "syn22126068" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      readRDS()  %>%
+      synapse_rds_id_tbl() %>%
       dplyr::select(
         "label",
         "feature" = "metric",
@@ -58,7 +49,8 @@ tcag_build_driver_results_files <- function() {
       dplyr::left_join(genes, by = "hgnc") %>%
       dplyr::select(-c("hgnc", "label")) %>%
       dplyr::select("entrez", "feature", "mutation_code", "tag", dplyr::everything()) %>%
-      dplyr::distinct()
+      dplyr::distinct() %>%
+      dplyr::mutate(dataset = "TCGA")
 
     return(driver_results)
   }

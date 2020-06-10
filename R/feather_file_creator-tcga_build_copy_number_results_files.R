@@ -13,7 +13,8 @@ tcag_build_copy_number_results_files <- function() {
     cat_results_status("Clean up the data set.")
     copy_number_results <- copy_number_results %>%
       dplyr::distinct(entrez, feature, tag, direction, mean_normal, mean_cnv, p_value, log10_p_value, t_stat) %>%
-      dplyr::arrange(entrez, feature, tag, direction)
+      dplyr::arrange(entrez, feature, tag, direction) %>%
+      dplyr::mutate(dataset = "TCGA")
 
     return(copy_number_results)
   }
