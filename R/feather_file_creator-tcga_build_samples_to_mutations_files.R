@@ -1,19 +1,14 @@
 tcga_build_samples_to_mutations_files <- function() {
-
-  iatlas.data::create_global_synapse_connection()
+  require(magrittr)
 
   get_samples_to_mutations <- function() {
 
     tcga_gene_ids <- "syn22133677" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
       tidyr::drop_na()
 
     new_gene_ids <- "syn21788372" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      readr::read_tsv(.) %>%
+      iatlas.data::synapse_delimited_id_to_tbl(.) %>%
       dplyr::select("hgnc", "entrez")
 
     gene_ids <- dplyr::bind_rows(
@@ -22,9 +17,7 @@ tcga_build_samples_to_mutations_files <- function() {
     )
 
     samples_to_mutations <- "syn22131029" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
       dplyr::rename(sample = ParticipantBarcode) %>%
       tidyr::pivot_longer(
         -"sample",

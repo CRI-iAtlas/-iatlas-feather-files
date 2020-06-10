@@ -1,31 +1,25 @@
 tcga_build_mutations_files <- function() {
-  iatlas.data::create_global_synapse_connection()
+  require(magrittr)
 
   get_mutations <- function() {
 
     cat(crayon::magenta(paste0("Get mutations")), fill = TRUE)
 
     tcga_gene_ids <- "syn22133677" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
       tidyr::drop_na()
 
     new_gene_ids <- "syn21788372" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      readr::read_tsv(.) %>%
+      iatlas.data::synapse_delimited_id_to_tbl(.) %>%
       dplyr::select("hgnc", "entrez")
 
     gene_ids <- dplyr::bind_rows(
       tcga_gene_ids,
-      dplyr::filter(new_gene_ids, !entrez %in% tcga_gene_ids$entrez)
+      dplyr::filter(new_gene_ids, !hgnc %in% tcga_gene_ids$hgnc)
     )
 
     mutations <- "syn22131029" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
       dplyr::select(-"ParticipantBarcode") %>%
       colnames() %>%
       unique() %>%
@@ -37,6 +31,7 @@ tcga_build_mutations_files <- function() {
       dplyr::mutate(code = dplyr::if_else(is.na(code), "(NS)", code)) %>%
       dplyr::left_join(gene_ids, by = "hgnc") %>%
       dplyr::select("entrez", "code") %>%
+      dplyr::distinct() %>%
       dplyr::mutate("type" = "driver_mutation") %>%
       dplyr::arrange(entrez, code)
 
