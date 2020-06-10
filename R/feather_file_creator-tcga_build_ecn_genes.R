@@ -13,7 +13,7 @@ tcga_build_ecn_genes <- function() {
     ) %>%
     tibble::add_column(type = "extra_cellular_network") %>%
     dplyr::left_join(
-      iatlas.data::get_gene_ids() %>%
+      iatlas.data::get_tcga_gene_ids() %>%
         dplyr::mutate_at(dplyr::vars(entrez), as.numeric),
       by = "hgnc"
       )

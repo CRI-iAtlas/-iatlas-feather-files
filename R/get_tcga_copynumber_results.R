@@ -25,7 +25,7 @@ get_tcga_copynumber_results <- function() {
     dplyr::mutate(feature = stringr::str_replace_all(feature, "\\.", "_"))
 
   # Convert HGNC to Entrez ---------------------------------------------------
-  tbl <- tbl %>% dplyr::inner_join(iatlas.data::get_gene_ids(), by = "hgnc")
+  tbl <- tbl %>% dplyr::inner_join(iatlas.data::get_tcga_gene_ids(), by = "hgnc")
 
   # Clean up the data ---------------------------------------------------
   tbl <- tbl %>% dplyr::distinct(entrez, feature, tag, direction, mean_normal, mean_cnv, p_value, log10_p_value, t_stat) %>%
