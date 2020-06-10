@@ -18,7 +18,7 @@ tcga_build_samples_to_mutations_files <- function() {
 
     gene_ids <- dplyr::bind_rows(
       tcga_gene_ids,
-      dplyr::filter(new_gene_ids, !entrez %in% tcga_gene_ids$entrez)
+      dplyr::filter(new_gene_ids, !hgnc %in% tcga_gene_ids$hgnc)
     )
 
     samples_to_mutations <- "syn22131029" %>%
