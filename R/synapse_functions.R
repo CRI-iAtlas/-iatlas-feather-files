@@ -48,3 +48,29 @@ synapse_store_file <- function(file, parent_id) {
   .GlobalEnv$synapse$store(file_entity)
 }
 
+synapse_feather_id_to_tbl <- function(id) {
+  create_global_synapse_connection()
+  id %>%
+    .GlobalEnv$synapse$get() %>%
+    purrr::pluck("path") %>%
+    feather::read_feather(.) %>%
+    dplyr::as_tibble()
+}
+
+synapse_dellimted_id_to_tbl <- function(id, delim = "\t") {
+  create_global_synapse_connection()
+  id %>%
+    .GlobalEnv$synapse$get() %>%
+    purrr::pluck("path") %>%
+    readr::read_delim(., delim = delim)
+}
+
+synapse_rds_id_tbl <- function(id) {
+  create_global_synapse_connection()
+  id %>%
+    .GlobalEnv$synapse$get() %>%
+    purrr::pluck("path") %>%
+    readRDS() %>%
+    dplyr::as_tibble()
+}
+
