@@ -1,4 +1,4 @@
-attempt_instantiate <- function() {
+attempt_instantiate_synapse <- function() {
   if (reticulate::py_module_available("synapseclient")) {
     synapse <- reticulate::import("synapseclient")
     return(synapse)
@@ -7,9 +7,18 @@ attempt_instantiate <- function() {
   return(NULL)
 }
 
+attempt_instantiate_synapse_table <- function() {
+  if (reticulate::py_module_available("synapseclient.table")) {
+    syntab <- reticulate::import("synapseclient.table")
+    return(syntab)
+  }
+  cat(crayon::red("synapseclient.table unavailable!\n"))
+  return(NULL)
+}
+
 create_global_synapse_connection <- function() {
   if (!iatlas.data::present(.GlobalEnv$syn)) {
-    syn <- iatlas.data::attempt_instantiate()
+    syn <- iatlas.data::attempt_instantiate_synapse()
     synapse <- syn$Synapse()
     if (!is.null(synapse) & is.null(synapse$username)) {
       synapse$login()
@@ -17,8 +26,10 @@ create_global_synapse_connection <- function() {
       cat(crayon::green("NOT Logged into Synapse\n"))
       return(NA)
     }
+    syntab <- attempt_instantiate_synapse_table()
     .GlobalEnv$syn <- syn
     .GlobalEnv$synapse <- synapse
+    .GlobalEnv$syntab <- syntab
     cat(crayon::green("Logged into Synapse\n"))
   } else {
     cat(crayon::green("Already logged into Synapse\n"))
@@ -57,7 +68,7 @@ synapse_feather_id_to_tbl <- function(id) {
     dplyr::as_tibble()
 }
 
-synapse_dellimted_id_to_tbl <- function(id, delim = "\t") {
+synapse_delimited_id_to_tbl <- function(id, delim = "\t") {
   create_global_synapse_connection()
   id %>%
     .GlobalEnv$synapse$get() %>%
@@ -72,5 +83,20 @@ synapse_rds_id_tbl <- function(id) {
     purrr::pluck("path") %>%
     readRDS() %>%
     dplyr::as_tibble()
+}
+
+update_synapse_table <- function(
+  table_id,
+  tbl,
+  syntab  = .GlobalEnv$syntab,
+  synapse = .GlobalEnv$synapse
+){
+  create_global_synapse_connection()
+  current_rows <- synapse$tableQuery(glue::glue("SELECT * FROM {table_id}"))
+  synapse$delete(current_rows)
+  tmpfile <- fs::file_temp("rows.csv")
+  readr::write_csv(tbl, tmpfile, na = "")
+  update_rows <- syntab$Table(table_id, tmpfile)
+  synapse$store(update_rows)
 }
 
