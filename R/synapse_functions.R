@@ -47,10 +47,9 @@ synapse_logout <- function() {
 }
 
 synapse_store_feather_file <- function(df, file_name, parent_id){
-  res <- feather::write_feather(df, file_name)
+  feather::write_feather(df, file_name)
   iatlas.data::synapse_store_file(file_name, parent_id)
   file.remove(file_name)
-  return(res)
 }
 
 synapse_store_file <- function(file, parent_id) {
