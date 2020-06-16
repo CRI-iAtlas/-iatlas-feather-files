@@ -50,11 +50,7 @@ tcga_build_tags_to_tags_files <- function() {
       ~tag,                    ~related_tag,
       "TCGA",                  "dataset",
       "extracellular_network", "network",
-      "cellimage_network",     "network",
-      "Immune_Subtype",        "TCGA",
-      "TCGA_Subtype",          "TCGA",
-      "TCGA_Study",            "TCGA"
-
+      "cellimage_network",     "network"
     )
 
     tags_to_tags <- dplyr::bind_rows(tags1, tags2, tags3, tags4, tags5, tags6)
@@ -62,15 +58,10 @@ tcga_build_tags_to_tags_files <- function() {
     return(tags_to_tags)
   }
 
-  .GlobalEnv$tcga_tags_to_tags <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_tags_to_tags(),
     "tcga_tags_to_tags.feather",
     "syn22125980"
   )
 
-  ### Clean up ###
-  # Data
-  rm(tcga_tags_to_tags, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

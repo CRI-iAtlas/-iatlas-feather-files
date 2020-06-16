@@ -1,6 +1,6 @@
 pcawg_build_tags_to_tags_files <- function() {
 
-  iatlas.data::create_global_synapse_connection()
+  require(magrittr)
 
   get_tags_to_tags <- function() {
 
@@ -17,10 +17,7 @@ pcawg_build_tags_to_tags_files <- function() {
 
     tags3 <- dplyr::tribble(
       ~tag,            ~related_tag,
-      "PCAWG_Study",    "parent_group",
-      "Immune_Subtype", "PCAWG",
-      "PCAWG_Study",    "PCAWG",
-      "PCAWG",          "dataset"
+      "PCAWG_Study",    "parent_group"
     )
 
     tags_to_tags <- dplyr::bind_rows(tags1, tags2, tags3)
@@ -28,15 +25,10 @@ pcawg_build_tags_to_tags_files <- function() {
     return(tags_to_tags)
   }
 
-  .GlobalEnv$pcawg_samples_to_tags <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_tags_to_tags(),
     "pcawg_tags_to_tags.feather",
     "syn22125980"
   )
 
-  ### Clean up ###
-  # Data
-  rm(pcawg_tags_to_tags, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

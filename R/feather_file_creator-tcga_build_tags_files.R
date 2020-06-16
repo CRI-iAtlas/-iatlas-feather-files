@@ -1,13 +1,11 @@
 tcga_build_tags_files <- function() {
 
-  iatlas.data::create_global_synapse_connection()
+  require(magrittr)
 
   get_tags <- function() {
 
     all_tags <- "syn22140514" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.)
+      iatlas.data::synapse_feather_id_to_tbl()
 
     tags1 <- all_tags %>%
       dplyr::select(
@@ -31,31 +29,26 @@ tcga_build_tags_files <- function() {
     tags <-
       dplyr::bind_rows(tags1, tags2) %>%
       dplyr::add_row(
-        "name" = c("TCGA", "Immune_Subtype", "TCGA_Subtype", "TCGA_Study"),
-        "display" = c("TCGA", "Immune Subtype", "TCGA Subtype", "TCGA Study"),
+        "name" = c("Immune_Subtype", "TCGA_Subtype", "TCGA_Study"),
+        "display" = c("Immune Subtype", "TCGA Subtype", "TCGA Study"),
       ) %>%
       dplyr::add_row(
         "name" = c("extracellular_network", "cellimage_network"),
         "display" = c("Extracellular Network", "Cellimage Network")
       ) %>%
       dplyr::add_row(
-        "name" = c("dataset", "parent_group", "metagroup", "group", "network"),
-        "display" = c("Dataset", "Parent Group", "Metagroup", "Group", "Network")
+        "name" = c("parent_group", "metagroup", "group", "network"),
+        "display" = c("Parent Group", "Metagroup", "Group", "Network")
       ) %>%
       dplyr::arrange(name)
 
     return(tags)
   }
 
-  .GlobalEnv$tcga_tags <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_tags(),
     "tcga_tags.feather",
     "syn22125978"
   )
 
-  ### Clean up ###
-  # Data
-  rm(tcga_tags, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

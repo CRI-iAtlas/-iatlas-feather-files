@@ -1,8 +1,6 @@
 pcawg_build_tags_files <- function() {
 
-  iatlas.data::create_global_synapse_connection()
-
-
+  require(magrittr)
 
   get_tags <- function() {
 
@@ -13,25 +11,17 @@ pcawg_build_tags_files <- function() {
       dplyr::distinct() %>%
       dplyr::filter(!stringr::str_detect(name, "C[:digit:]")) %>%
       dplyr::filter(name != "PCAWG") %>%
-      dplyr::mutate("display" = name, "type" = "group") %>%
-      dplyr::add_row(name = "PCAWG", display = "PCAWG") %>%
+      dplyr::mutate("display" = name) %>%
       dplyr::add_row(name = "PCAWG_Study", display = "PCAWG Study") %>%
       dplyr::arrange(name)
 
     return(tags)
   }
 
-  # Setting these to the GlobalEnv just for development purposes.
-
-  .GlobalEnv$pcawg_samples_to_tags <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_tags(),
     "pcawg_tags.feather",
     "syn22125978"
   )
 
-  ### Clean up ###
-  # Data
-  rm(pcawg_tags, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

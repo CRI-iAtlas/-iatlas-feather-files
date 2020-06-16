@@ -8,7 +8,7 @@ pcawg_build_samples_files <- function() {
 
     samples <- iatlas.data::get_pcawg_samples_cached() %>%
       dplyr::select(patient_barcode = sample) %>%
-      dplyr::mutate("name" = patient_barcode, "dataset" = "TCGA") %>%
+      dplyr::mutate("name" = patient_barcode, "dataset" = "PCAWG") %>%
       dplyr::arrange(name)
 
     return(samples)

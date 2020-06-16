@@ -12,7 +12,6 @@ tcga_build_samples_to_tags_files <- function() {
         "Immune_Subtype" = "Subtype_Immune_Model_Based",
         "TCGA_Subtype" = "Subtype_Curated_Malta_Noushmehr_et_al"
       ) %>%
-      dplyr::mutate("dataset" = "TCGA") %>%
       tidyr::pivot_longer(-"sample", values_to = "tag") %>%
       tidyr::drop_na() %>%
       tidyr::pivot_longer(-"sample", values_to = "tag") %>%
@@ -24,16 +23,9 @@ tcga_build_samples_to_tags_files <- function() {
     return(samples_to_tags)
   }
 
-  .GlobalEnv$tcga_samples_to_tags <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_samples_to_tags(),
     "tcga_samples_to_tags.feather",
     "syn22125729"
   )
-
-
-  ### Clean up ###
-  # Data
-  rm(tcga_samples_to_tags, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

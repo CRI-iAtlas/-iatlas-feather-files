@@ -1,4 +1,5 @@
 pcawg_build_samples_to_tags_files <- function() {
+  require(magrittr)
 
   cat_samples_to_tags_status <- function(message) {
     cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
@@ -7,7 +8,8 @@ pcawg_build_samples_to_tags_files <- function() {
   get_samples_to_tags <- function() {
 
     cat_samples_to_tags_status("Get all PCAWG samples_to_tags from Synapse.")
-    samples_to_tags_pcawg <- iatlas.data::get_pcawg_tag_values_cached()
+    samples_to_tags_pcawg <- iatlas.data::get_pcawg_tag_values_cached() %>%
+      dplyr::filter(tag != "PCAWG")
 
     cat_samples_to_tags_status("Get all PCAWG samples and tag them PCAWG_Study.")
     samples_to_pcawg_study <- iatlas.data::get_pcawg_samples_cached() %>%
@@ -29,18 +31,10 @@ pcawg_build_samples_to_tags_files <- function() {
     return(samples_to_tags)
   }
 
-  .GlobalEnv$pcawg_samples_to_tags <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_samples_to_tags(),
     "pcawg_samples_to_tags.feather",
     "syn22125729"
   )
 
-  # Log out of Synapse.
-  iatlas.data::synapse_logout()
-
-  ### Clean up ###
-  # Data
-  rm(pcawg_samples_to_tags, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }
