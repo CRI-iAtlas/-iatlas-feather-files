@@ -1,13 +1,10 @@
 tcga_build_tags_to_tags_files <- function() {
 
-  iatlas.data::create_global_synapse_connection()
+  require(magrittr)
 
   get_tags_to_tags <- function() {
 
-    all_tags <- "syn22140514" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.)
+    all_tags <- synapse_feather_id_to_tbl("syn22140514")
 
     tags1 <- all_tags %>%
       dplyr::select(
