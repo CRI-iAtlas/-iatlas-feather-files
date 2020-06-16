@@ -47,13 +47,19 @@ build_genes <- function(){
 
   wolf <- "syn22151547" %>%
     iatlas.data::synapse_delimited_id_to_tbl(.) %>%
-    dplyr::select("entrez" = "Genes", "gene_type" = "GeneSet")
+    dplyr::select("entrez" = "Genes", "gene_type" = "GeneSet") %>%
+    tidyr::drop_na()
 
   yasin <- "syn22151548" %>%
     iatlas.data::synapse_delimited_id_to_tbl(.) %>%
-    dplyr::select("entrez" = "Entrez", "gene_type" = "GeneSet")
+    dplyr::select("entrez" = "Entrez", "gene_type" = "GeneSet") %>%
+    tidyr::drop_na()
 
-  genesets <-
+  entrez_ids <- "syn21788372" %>%
+    iatlas.data::synapse_delimited_id_to_tbl(.) %>%
+    dplyr::pull("entrez")
+
+  tbl <-
     dplyr::bind_rows(wolf, yasin) %>%
     dplyr::mutate("gene_type" = stringr::str_replace_all(gene_type, "[ \\.]", "_")) %>%
     dplyr::bind_rows(
@@ -62,9 +68,10 @@ build_genes <- function(){
       potential_immunomodulators,
       extracellular_network,
       cellimage_network
-    )
+    ) %>%
+    dplyr::filter(entrez %in% entrez_ids)
 
-  iatlas.data::synapse_store_feather_file(genesets, "genes_to_types.feather", "syn22130912")
+  iatlas.data::synapse_store_feather_file(tbl, "genes_to_types.feather", "syn22130912")
 
 }
 

@@ -1,5 +1,6 @@
 pcawg_build_genes_to_samples_files <- function() {
 
+  require(magrittr)
   cat_genes_to_samples_status <- function(message) {
     cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
   }
@@ -11,8 +12,14 @@ pcawg_build_genes_to_samples_files <- function() {
     cat_genes_to_samples_status("Get the initial values from the genes_to_samples table.")
     genes_to_samples <- iatlas.data::get_pcawg_rnaseq_cached()
 
+    entrez_ids <- "syn21788372" %>%
+      iatlas.data::synapse_delimited_id_to_tbl(.) %>%
+      dplyr::pull("entrez")
+
     cat_genes_to_samples_status("Clean up the data set.")
-    genes_to_samples <- genes_to_samples %>% dplyr::distinct(entrez, sample, rna_seq_expr)
+    genes_to_samples <- genes_to_samples %>%
+      dplyr::distinct(entrez, sample, rna_seq_expr) %>%
+      dplyr::filter(entrez %in% entrez_ids)
 
     return(genes_to_samples)
   }

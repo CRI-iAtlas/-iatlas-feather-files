@@ -12,7 +12,14 @@ build_genes <- function(){
       "gene_function" = "Function",,
       "references" = "Reference(s) [PMID]"
     ) %>%
-    dplyr::filter(!is.na(entrez))
+    dplyr::filter(!is.na(entrez)) %>%
+    dplyr::mutate("references" = purrr::map_chr(
+      references,
+      ~ .x %>%
+        stringr::str_split(., " \\| ") %>%
+        purrr::map_chr(purrr::pluck(1)) %>%
+        stringr::str_c("{", ., "}")
+    ))
 
   io_targets <- "syn22151533" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
@@ -23,7 +30,11 @@ build_genes <- function(){
       "therapy_type" = "Therapy Type",
       "description" = "Description"
     ) %>%
-    dplyr::mutate("entrez" = as.integer(entrez))
+    dplyr::mutate("entrez" = as.integer(entrez)) %>%
+    dplyr::group_by(entrez) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup()
+
 
   extracellular_network <- "syn21783989" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
