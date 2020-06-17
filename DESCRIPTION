@@ -9,7 +9,11 @@ Authors@R: c(
     person(given = "Shane",
            family = "Delamore",
            role = "aut",
-           email = "shane@genui.co")
+           email = "shane@genui.co"),
+    person(given = "Andrew",
+           family = "Lamb",
+           role = "aut",
+           email = "andrew.lamb@sagebase.org")
     )
 Description: Data and scripts to build said data into a Postgres database for the iAtlas app.
 License: What license it uses
