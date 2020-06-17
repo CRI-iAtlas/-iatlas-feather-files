@@ -20,12 +20,9 @@ License: What license it uses
 Encoding: UTF-8
 LazyData: true
 Imports:
-    config,
     crayon,
     dplyr,
     feather,
-    janitor,
-    logging,
     magrittr,
     purrr,
     reticulate,
@@ -33,5 +30,4 @@ Imports:
     stringi,
     testthat,
     tibble,
-    tictoc,
     tidyr

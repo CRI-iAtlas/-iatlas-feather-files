@@ -1,40 +1,5 @@
 present <- function (a) {!identical(a, NA) && !identical(a, NULL)}
 
-timed <- function(v, before_message = NA, after_message = "", message = NA) {
-  if (present(message)) {
-    before_message <- paste0(message, "...\n")
-    after_message <- message
-  }
-  tictoc::tic(after_message)
-  if (present(before_message)) cat(before_message)
-  on.exit(tictoc::toc())
-  v
-}
-
-read_feather_with_info <- function(file_path) {
-  size <- file.info(file_path)$size
-  if (size > 1024**2)
-    timed(feather::read_feather(file_path), before_message = paste0("READ: ", file_path, " (", floor(10 * size / 1024**2)/10, " megabytes)"))
-  else
-    feather::read_feather(file_path)
-}
-
-read_iatlas_data_file <- function(root_path, relative_path, join = FALSE) {
-  file_path <- paste0(root_path, "/", relative_path)
-  if (grepl("[*?]", file_path)) {
-    load_feather_files(Sys.glob(file_path), join)
-  } else {
-    if (!file.exists(file_path)) {
-      stop(paste0("read_iatlas_data_file: file does not exist: ", file_path))
-    }
-    if (file.info(file_path)$isdir) {
-      load_feather_data(file_path, join)
-    } else {
-      read_feather_with_info(file_path)
-    }
-  }
-}
-
 get_tag_column_names <- function(df) {
   if (!is_df_empty(df)) {
     column_names <- df %>% names()

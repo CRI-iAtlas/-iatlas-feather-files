@@ -15,7 +15,7 @@ get_pcawg_samples_cached <- function(){
     "pcawg_sample_tbl",
     get_pcawg_sample_tbl_cached() %>%
       dplyr::select(sample = icgc_donor_id) %>%
-      plyr::mutate(patient = sample)
+      dplyr::mutate(patient = sample)
   )
 }
 
