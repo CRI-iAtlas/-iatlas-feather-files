@@ -9,17 +9,9 @@ build_genes <- function(){
       "gene_family" = "Gene Family",
       "super_category" = "Super Category",
       "immune_checkpoint" = "Immune Checkpoint",
-      "gene_function" = "Function",,
-      "references" = "Reference(s) [PMID]"
+      "gene_function" = "Function"
     ) %>%
-    dplyr::filter(!is.na(entrez)) %>%
-    dplyr::mutate("references" = purrr::map_chr(
-      references,
-      ~ .x %>%
-        stringr::str_split(., " \\| ") %>%
-        purrr::map_chr(purrr::pluck(1)) %>%
-        stringr::str_c("{", ., "}")
-    ))
+    dplyr::filter(!is.na(entrez))
 
   io_targets <- "syn22151533" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
@@ -73,7 +65,7 @@ build_genes <- function(){
       by = "entrez"
     ) %>%
     dplyr::right_join(entrez_to_hgnc, by = "entrez") %>%
-    dplyr::select("entrez", "hgnc", "references", dplyr::everything())
+    dplyr::select("entrez", "hgnc", dplyr::everything())
 
   iatlas.data::synapse_store_feather_file(tbl, "genes.feather", "syn22125640")
 
