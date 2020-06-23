@@ -1,21 +1,23 @@
-cellimage_cells <- c(
-  "B_cells",
-  "Dendritic_cells",
-  "Eosinophils",
-  "Macrophage",
-  "Mast_cells",
-  "NK_cells",
-  "Neutrophils",
-  "T_cells_CD4",
-  "T_cells_CD8"
-)
-
 get_tcga_cellimage_nodes <- function() {
-  position_tbl <- iatlas.data::synapse_feather_id_to_tbl("syn21781366")
-  nodes_tbl <- get_tcga_cytokine_nodes_cached()
 
-  cellimage_nodes <- "syn21782167" %>%
-    iatlas.data::synapse_feather_id_to_tbl() %>%
+  cellimage_cells <- c(
+    "B_cells",
+    "Dendritic_cells",
+    "Eosinophils",
+    "Macrophage",
+    "Mast_cells",
+    "NK_cells",
+    "Neutrophils",
+    "T_cells_CD4",
+    "T_cells_CD8"
+  )
+
+  position_tbl <- iatlas.data::synapse_feather_id_to_tbl("syn21781366")
+  nodes_tbl    <- get_tcga_extracellular_network_nodes() %>%
+    dplyr::select(tag, tag2, feature, entrez, label, score)
+  label_tbl    <- iatlas.data::synapse_feather_id_to_tbl("syn21782167")
+
+  cellimage_nodes <- label_tbl %>%
     dplyr::select(From, To) %>%
     tidyr::pivot_longer(
       .,
@@ -50,13 +52,35 @@ get_tcga_cellimage_nodes <- function() {
   feature_nodes <- nodes_tbl %>%
     dplyr::inner_join(cellimage_nodes, by = c("feature" = "node"))
 
-  gene_nodes %>% dplyr::bind_rows(feature_nodes)
+  nodes_tbl2 <-
+    dplyr::bind_rows(gene_nodes, feature_nodes) %>%
+    dplyr::mutate(
+      dataset = "TCGA",
+      "network" = "cellimage_network",
+      "id" = 1:dplyr::n()
+    )
 }
 
 get_tcga_cellimage_edges <- function() {
-  edges_tbl <- get_tcga_cytokine_edges_cached()
+  cellimage_cells <- c(
+    "B_cells",
+    "Dendritic_cells",
+    "Eosinophils",
+    "Macrophage",
+    "Mast_cells",
+    "NK_cells",
+    "Neutrophils",
+    "T_cells_CD4",
+    "T_cells_CD8"
+  )
+  extracellular_nodes_tbl <- get_tcga_extracellular_network_nodes() %>%
+    dplyr::select(feature, entrez, id)
+  extracellular_edges_tbl <- get_tcga_extracellular_network_edges() %>%
+    dplyr::select(node1, node2, score)
+  cellimage_nodes_tbl     <- get_tcga_cellimage_nodes() %>%
+    dplyr::select(feature, entrez, id)
 
-  cellimage_edges <- "syn21782167" %>%
+  cellimage_edges_tbl1 <- "syn21782167" %>%
     iatlas.data::synapse_feather_id_to_tbl() %>%
     dplyr::select(from = From, to = To, label = interaction) %>%
     dplyr::left_join(iatlas.data::get_tcga_gene_ids(), by = c("from" = "hgnc")) %>%
@@ -88,7 +112,60 @@ get_tcga_cellimage_edges <- function() {
         )
       )
     )) %>%
-    dplyr::select(-entrez) %>%
-    dplyr::full_join(edges_tbl, by = c("from", "to"))
+    dplyr::select(-entrez)
+
+  feature_edges1 <- cellimage_edges_tbl1 %>%
+    dplyr::inner_join(extracellular_nodes_tbl, .,  by = c("feature" = "from")) %>%
+    dplyr::select(-"entrez") %>%
+    dplyr::rename(ecn_node1 = id) %>%
+    dplyr::inner_join(
+      dplyr::select(cellimage_nodes_tbl, -"entrez"),
+      by = "feature"
+    ) %>%
+    dplyr::select(-"feature") %>%
+    dplyr::rename(node1 = id)
+
+
+  genes_edges1 <- cellimage_edges_tbl1 %>%
+    dplyr::mutate("from" = as.integer(from)) %>%
+    dplyr::filter(!is.na(from)) %>%
+    dplyr::inner_join(extracellular_nodes_tbl, .,  by = c("entrez" = "from")) %>%
+    dplyr::select(-"feature") %>%
+    dplyr::rename(ecn_node1 = id) %>%
+    dplyr::inner_join(
+      dplyr::select(cellimage_nodes_tbl, -"feature"),
+      by = "entrez"
+    ) %>%
+    dplyr::rename(node1 = id) %>%
+    dplyr::select(-"entrez")
+
+  cellimage_edges_tbl2 <-
+    dplyr::bind_rows(feature_edges1, genes_edges1)
+
+  feature_edges2 <- cellimage_edges_tbl2 %>%
+    dplyr::inner_join(extracellular_nodes_tbl, .,  by = c("feature" = "to")) %>%
+    dplyr::select(-"entrez") %>%
+    dplyr::rename(ecn_node1 = id) %>%
+    dplyr::inner_join(
+      dplyr::select(cellimage_nodes_tbl, -"entrez"),
+      by = "feature"
+    ) %>%
+    dplyr::select(-"feature") %>%
+    dplyr::rename(node1 = id)
+
+  genes_edges1 <- cellimage_edges_tbl1 %>%
+    dplyr::mutate("from" = as.integer(from)) %>%
+    dplyr::filter(!is.na(from)) %>%
+    dplyr::inner_join(extracellular_nodes_tbl, .,  by = c("entrez" = "from")) %>%
+    dplyr::rename(ecn_node1 = id) %>%
+    dplyr::inner_join(cellimage_nodes_tbl) %>%
+    dplyr::rename(node1 = id) %>%
+    dplyr::select(-c("feature", "entrez"))
+
+  cellimage_edges_tbl3 <-
+    dplyr::bind_rows(feature_edges2, genes_edges2) %>%
+    dplyr::distinct() %>%
+    dplyr::left_join(extracellular_edges_tbl, by = c("node1", "node2")) %>%
+    dplyr::select(-c("node1", "node2"))
 
 }
