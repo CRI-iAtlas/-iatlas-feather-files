@@ -18,7 +18,7 @@ build_tcga_immunomodulator_publication_to_genes <- function(){
   iatlas.data::synapse_store_feather_file(
     tbl,
     "tcga_immunomodulator_publications_to_genes.feather",
-    "syn22168383"
+    "syn22168421"
   )
 }
 
