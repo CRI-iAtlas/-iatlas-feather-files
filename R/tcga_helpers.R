@@ -1,16 +1,16 @@
-get_tcga_cytokine_nodes_cached <- function() {
+get_tcga_extracellular_network_nodes_cached <- function() {
   iatlas.data::create_global_synapse_connection()
   iatlas.data::result_cached(
-    "tcga_cytokine_nodes_synapse",
-    iatlas.data::get_tcga_cytokine_nodes()
+    "tcga_extracellular_network_nodes",
+    iatlas.data::get_tcga_extracellular_network_nodes()
   )
 }
 
-get_tcga_cytokine_edges_cached <- function() {
+get_tcga_extracellular_network_edges_cached <- function() {
   iatlas.data::create_global_synapse_connection()
   iatlas.data::result_cached(
-    "tcga_cytokine_edges_synapse",
-    iatlas.data::get_tcga_cytokine_edges()
+    "get_tcga_extracellular_network_edges",
+    iatlas.data::get_tcga_extracellular_network_edges()
   )
 }
 

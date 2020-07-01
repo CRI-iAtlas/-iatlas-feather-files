@@ -24,7 +24,7 @@ get_tcga_extracellular_network_nodes <- function() {
       node  = Node,
       tag   = Group,
       score = UpBinRatio,
-      tag2  = Immune
+      tag_2  = Immune
     ) %>%
     dplyr::left_join(labels, by = "node") %>%
     dplyr::mutate(
@@ -54,14 +54,14 @@ get_tcga_extracellular_network_nodes <- function() {
     dplyr::mutate(
       dataset = "TCGA",
       "network" = "extracellular_network",
-      "id" = 1:dplyr::n()
+      "name" = stringr::str_c("tcga_ecn_", 1:dplyr::n())
     )
 }
 
 get_tcga_extracellular_network_edges <- function() {
   require(magrittr)
-  nodes_tbl <- get_tcga_extracellular_network_nodes() %>%
-    dplyr::select(id, feature, entrez, tag, tag2) %>%
+  nodes_tbl <- get_tcga_extracellular_network_nodes_cached() %>%
+    dplyr::select(name, feature, entrez, tag, tag_2) %>%
     dplyr::mutate("entrez" = as.character(entrez))
 
   edges_tbl <-
@@ -73,7 +73,7 @@ get_tcga_extracellular_network_edges <- function() {
       to    = To,
       score = ratioScore,
       tag   = Group,
-      tag2 = Immune
+      tag_2 = Immune
     ) %>%
     dplyr::filter(!is.na(tag)) %>%
     dplyr::left_join(iatlas.data::get_tcga_gene_ids(), by = c("from" = "hgnc")) %>%
@@ -93,32 +93,28 @@ get_tcga_extracellular_network_edges <- function() {
     dplyr::filter(!is.na(tag))
 
   feature_edges_tbl1 <- edges_tbl %>%
-    dplyr::inner_join(nodes_tbl, by = c("from" = "feature", "tag", "tag2")) %>%
+    dplyr::inner_join(nodes_tbl, by = c("from" = "feature", "tag", "tag_2")) %>%
     dplyr::select(-c("from", "entrez")) %>%
-    dplyr::rename("node1" = id)
+    dplyr::rename("node1" = name)
 
   gene_edges_tbl1 <- edges_tbl %>%
-    dplyr::inner_join(nodes_tbl, by = c("from" = "entrez", "tag", "tag2")) %>%
+    dplyr::inner_join(nodes_tbl, by = c("from" = "entrez", "tag", "tag_2")) %>%
     dplyr::select(-c("from", "feature")) %>%
-    dplyr::rename("node1" = id)
+    dplyr::rename("node1" = name)
 
   edges_tbl2 <- dplyr::bind_rows(feature_edges_tbl1, gene_edges_tbl1)
 
   feature_edges_tbl2 <- edges_tbl2 %>%
-    dplyr::inner_join(nodes_tbl, by = c("to" = "feature", "tag", "tag2")) %>%
+    dplyr::inner_join(nodes_tbl, by = c("to" = "feature", "tag", "tag_2")) %>%
     dplyr::select(-c("to", "entrez")) %>%
-    dplyr::rename("node2" = id)
+    dplyr::rename("node2" = name)
 
   gene_edges_tbl2 <- edges_tbl2 %>%
-    dplyr::inner_join(nodes_tbl, by = c("to" = "entrez", "tag", "tag2")) %>%
+    dplyr::inner_join(nodes_tbl, by = c("to" = "entrez", "tag", "tag_2")) %>%
     dplyr::select(-c("to", "feature")) %>%
-    dplyr::rename("node2" = id)
+    dplyr::rename("node2" = name)
 
   edges_tbl3 <- dplyr::bind_rows(feature_edges_tbl2, gene_edges_tbl2) %>%
-    dplyr::select(-c("tag", "tag2")) %>%
-    dplyr::mutate(
-      dataset = "TCGA",
-      "network" = "extracellular_network",
-      "id" = 1:dplyr::n()
-    )
+    dplyr::select(-c("tag", "tag_2")) %>%
+    dplyr::mutate("name" = stringr::str_c("tcga_ecn_", 1:dplyr::n()))
 }

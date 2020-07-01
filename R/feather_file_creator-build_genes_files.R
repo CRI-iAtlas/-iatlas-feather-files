@@ -27,40 +27,13 @@ build_genes <- function(){
     dplyr::slice(1) %>%
     dplyr::ungroup()
 
-
-  extracellular_network <- "syn21783989" %>%
-    iatlas.data::synapse_feather_id_to_tbl(.) %>%
-    dplyr::select(
-      "hgnc" = "Obj",
-      "node_type" = "Type"
-    ) %>%
-    dplyr::left_join(
-      iatlas.data::get_tcga_gene_ids() %>%
-        dplyr::mutate_at(dplyr::vars(entrez), as.numeric),
-      by = "hgnc"
-    ) %>%
-    dplyr::select(-"hgnc") %>%
-    tidyr::drop_na()
-
-  cellimage_network <- "syn21782167" %>%
-    iatlas.data::synapse_feather_id_to_tbl(.) %>%
-    tidyr::pivot_longer(-"interaction", values_to = "hgnc") %>%
-    dplyr::select("hgnc") %>%
-    dplyr::distinct() %>%
-    dplyr::left_join(
-      iatlas.data::get_tcga_gene_ids() %>%
-        dplyr::mutate_at(dplyr::vars(entrez), as.numeric),
-      by = "hgnc"
-    ) %>%
-    dplyr::select("entrez")
-
   entrez_to_hgnc <- "syn21788372" %>%
     iatlas.data::synapse_delimited_id_to_tbl(.) %>%
     dplyr::select("entrez", "hgnc")
 
   tbl <-
     purrr::reduce(
-      list(immunomodulators, io_targets, extracellular_network),
+      list(immunomodulators, io_targets),
       dplyr::full_join,
       by = "entrez"
     ) %>%
