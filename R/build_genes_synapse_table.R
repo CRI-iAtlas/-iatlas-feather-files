@@ -65,11 +65,11 @@ build_genes_synapse_table <- function(){
     dplyr::select("entrez") %>%
     dplyr::mutate("geneset" = "cellimage_network")
 
-  wolf <- "syn22151547" %>%
+  wolf <- "syn22240714" %>%
     iatlas.data::synapse_delimited_id_to_tbl(.) %>%
     dplyr::select("entrez" = "Genes", "geneset" = "GeneSet")
 
-  yasin <- "syn22151548" %>%
+  yasin <- "syn22240715" %>%
     iatlas.data::synapse_delimited_id_to_tbl(.) %>%
     dplyr::select("entrez" = "Entrez", "geneset" = "GeneSet")
 
@@ -90,8 +90,8 @@ build_genes_synapse_table <- function(){
     dplyr::arrange(entrez)
 
 
-  entrez_to_hgnc <- "syn21788372" %>%
-    iatlas.data::synapse_delimited_id_to_tbl(.) %>%
+  entrez_to_hgnc <- "syn22240716" %>%
+    iatlas.data::synapse_feather_id_to_tbl() %>%
     dplyr::select("entrez", "hgnc")
 
   tbl <-

@@ -1,4 +1,6 @@
 build_tcga_immunomodulator_publications <- function(){
+  require(magrittr)
+  require(rlang)
 
   tbl <- "syn22151531" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
@@ -17,12 +19,18 @@ build_tcga_immunomodulator_publications <- function(){
     purrr::map(dplyr::slice, 1) %>%
     dplyr::bind_rows() %>%
     dplyr::select(
+      "do_id" = "doi",
       "pubmed_id" = "pmid",
       "journal" = "jabbrv",
       "first_author_last_name" = "lastname",
       "year",
       "title"
-    )
+    ) %>%
+    dplyr::mutate("do_id" = dplyr::if_else(
+      .data$do_id == "",
+      NA_character_,
+      .data$do_id
+    ))
 
   iatlas.data::synapse_store_feather_file(
     tbl,

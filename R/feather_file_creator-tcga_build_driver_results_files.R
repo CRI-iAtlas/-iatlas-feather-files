@@ -6,10 +6,10 @@ tcag_build_driver_results_files <- function() {
 
   get_results <- function() {
 
-    tcga_genes <- synapse_feather_id_to_tbl("syn22125607") %>%
+    tcga_genes <- iatlas.data::synapse_feather_id_to_tbl("syn22133677") %>%
       dplyr::filter(!is.na(hgnc))
 
-    new_genes <- synapse_dellimted_id_to_tbl("syn21788372") %>%
+    new_genes <- iatlas.data::synapse_feather_id_to_tbl("syn22240716") %>%
       dplyr::filter(!is.na(hgnc)) %>%
       dplyr::select("entrez", "hgnc")
 
@@ -26,9 +26,9 @@ tcag_build_driver_results_files <- function() {
         "feature" = "metric",
         "tag" = "group2",
         "fold_change",
-        "log10_pvalue",
+        "log10_p_value" = "log10_pvalue",
         "log10_fold_change",
-        "pvalue",
+        "p_value" = "pvalue",
         "n_wt",
         "n_mut"
       ) %>%
@@ -41,7 +41,7 @@ tcag_build_driver_results_files <- function() {
         sep = "\\s",
         remove = TRUE
       ) %>%
-      dplyr::mutate(code = ifelse(
+      dplyr::mutate("mutation_code" = ifelse(
         is.na(mutation_code),
         "(NS)",
         mutation_code
@@ -55,15 +55,10 @@ tcag_build_driver_results_files <- function() {
     return(driver_results)
   }
 
-  .GlobalEnv$driver_results <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_results(),
     "driver_results.feather",
     "syn22126168"
   )
 
-  ### Clean up ###
-  # Data
-  rm(driver_results, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }
