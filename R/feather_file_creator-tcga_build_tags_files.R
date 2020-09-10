@@ -5,7 +5,7 @@ tcga_build_tags_files <- function() {
   get_tags <- function() {
 
     all_tags <- "syn22140514" %>%
-      iatlas.data::synapse_feather_id_to_tbl()
+      iatlas.data::synapse_feather_id_to_tbl(.)
 
     tags1 <- all_tags %>%
       dplyr::select(
@@ -16,14 +16,14 @@ tcga_build_tags_files <- function() {
       )
 
     tags2 <- all_tags %>%
-      dplyr::filter(sample_group == "Subtype_Curated_Malta_Noushmehr_et_al") %>%
+      dplyr::filter(.data$sample_group == "Subtype_Curated_Malta_Noushmehr_et_al") %>%
       dplyr::select(
         "name" = "TCGA Studies",
         "display" = "FeatureDisplayName"
       ) %>%
       dplyr::distinct() %>%
       dplyr::mutate(
-        "name" = paste0(name, " Subtypes")
+        "name" = paste0(.data$name, " Subtypes")
       )
 
     tags <-

@@ -1,4 +1,4 @@
-build_tcga_subtype_publications <- function(){
+build_tcga_subtypes_to_publications <- function(){
   require(magrittr)
   require(rlang)
 
@@ -43,12 +43,15 @@ build_tcga_subtype_publications <- function(){
     }
   }
 
-  tbl <- "syn22140514" %>%
+  do_tbl <- "syn22140514" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
     dplyr::filter(
       .data$sample_group == "Subtype_Curated_Malta_Noushmehr_et_al"
     ) %>%
-    dplyr::select("temp" = "Characteristics") %>%
+    dplyr::select(
+      "tag_name" = "FeatureValue",
+      "temp" = "Characteristics"
+    ) %>%
     dplyr::distinct() %>%
     tidyr::separate(
       "temp", " ; ",
@@ -74,10 +77,12 @@ build_tcga_subtype_publications <- function(){
       .data$journal == "Nejm",
       "N. Engl. J. Med.",
       .data$journal
-    ))
+    )) %>%
+    dplyr::select("tag_name", "do_id")
 
-  pubmed_tbl <- tbl %>%
+  pubmed_tbl <- do_tbl %>%
     dplyr::pull("do_id") %>%
+    unique() %>%
     purrr::map(easyPubMed::get_pubmed_ids) %>%
     purrr::map(easyPubMed::fetch_pubmed_data, encoding = "ASCII") %>%
     purrr::map(easyPubMed::article_to_df) %>%
@@ -87,14 +92,16 @@ build_tcga_subtype_publications <- function(){
     dplyr::select(
       "do_id" = "doi",
       "pubmed_id" = "pmid",
-      "first_author_last_name" = "lastname",
-      "title"
     )
 
+  tbl <-
+    dplyr::left_join(do_tbl, pubmed_tbl, by = "do_id") %>%
+    tidyr::unite("publication_name", "do_id", "pubmed_id")
+
   iatlas.data::synapse_store_feather_file(
-    dplyr::left_join(tbl, pubmed_tbl, by = "do_id"),
-    "tcga_subtype_publications.feather",
-    "syn22168316"
+    tbl,
+    "tcga_subtypes_to_publications.feather",
+    "syn22242574"
   )
 
 }

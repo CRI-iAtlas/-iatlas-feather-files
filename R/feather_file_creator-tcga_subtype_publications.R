@@ -43,7 +43,7 @@ build_tcga_subtype_publications <- function(){
     }
   }
 
-  tbl <- "syn22140514" %>%
+  do_tbl <- "syn22140514" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
     dplyr::filter(
       .data$sample_group == "Subtype_Curated_Malta_Noushmehr_et_al"
@@ -76,7 +76,7 @@ build_tcga_subtype_publications <- function(){
       .data$journal
     ))
 
-  pubmed_tbl <- tbl %>%
+  pubmed_tbl <- do_tbl %>%
     dplyr::pull("do_id") %>%
     purrr::map(easyPubMed::get_pubmed_ids) %>%
     purrr::map(easyPubMed::fetch_pubmed_data, encoding = "ASCII") %>%
@@ -91,8 +91,12 @@ build_tcga_subtype_publications <- function(){
       "title"
     )
 
+  tbl <-
+    dplyr::left_join(do_tbl, pubmed_tbl, by = "do_id") %>%
+    tidyr::unite("name", "do_id", "pubmed_id", remove = F)
+
   iatlas.data::synapse_store_feather_file(
-    dplyr::left_join(tbl, pubmed_tbl, by = "do_id"),
+    tbl,
     "tcga_subtype_publications.feather",
     "syn22168316"
   )

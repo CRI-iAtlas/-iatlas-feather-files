@@ -1,4 +1,4 @@
-tcag_build_features_to_samples_files <- function() {
+tcag_build_features_to_samples_files1 <- function() {
 
   get_features_to_samples <- function() {
 
@@ -6,23 +6,63 @@ tcag_build_features_to_samples_files <- function() {
 
     create_global_synapse_connection()
 
-    features <- "syn22127418" %>%
+    features <- "syn22128265" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
       feather::read_feather(.) %>%
-      dplyr::pull("name") %>%
-      unique()
+      dplyr::filter(
+        VariableType == "Numeric",
+        !is.na(FriendlyLabel),
+        .data$`Variable Class` != "Clinical"
+      ) %>%
+      dplyr::select(
+        "name" = "FeatureMatrixLabelTSV",
+        "display" = "FriendlyLabel",
+        "class" = "Variable Class",
+        "order" = "Variable Class Order",
+        "unit" = "Unit",
+        "origin" = "Origin"
+      ) %>%
+      dplyr::mutate(
+        "name" = stringr::str_replace_all(name, "[\\.]", "_"),
+        class = dplyr::if_else(is.na(class), "Miscellaneous", class),
+        class = dplyr::if_else(display %in% c("OS", "PFI"), "Survival Status", class),
+        class = dplyr::if_else(display %in% c("OS Time", "PFI Time"), "Survival Time", class)
+      ) %>%
+      dplyr::select(
+        "name", "display", "class", "order", "unit"
+      ) %>%
+      dplyr::add_row(
+        "name" = "Tumor_fraction",
+        "display" = "Tumor Fraction",
+        "class" = "Overall Proportion",
+        "order" = 4,
+        "unit"  = "Fraction"
+      ) %>%
+      dplyr::add_row(
+        "name" = "totTCR_reads",
+        "display" = "Total TCR reads",
+        "class" = "Miscellaneous",
+      ) %>%
+      dplyr::filter(
+        !(
+          name == "til_percentage" &
+            display == "TIL Regional Fraction (Percent)" &
+            class == "Overall Proportion"
+        )
+      ) %>%
+      dplyr::pull(name)
 
     features_to_samples <- "syn22128019" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
       feather::read_feather(.) %>%
-      dplyr::select("sample" = "ParticipantBarcode", where(is.numeric)) %>%
-      dplyr::mutate("Tumor_fraction" = 1 - Stromal_Fraction) %>%
+      dplyr::rename_all(~stringr::str_replace_all(.x, "[\\.]", "_")) %>%
+      dplyr::mutate("Tumor_fraction" = 1 - .data$Stromal_Fraction) %>%
+      dplyr::rename("sample" = "ParticipantBarcode") %>%
+      dplyr::select(dplyr::all_of(c("sample", features))) %>%
       tidyr::pivot_longer(-"sample", names_to = "feature") %>%
       tidyr::drop_na() %>%
-      dplyr::mutate(feature = stringr::str_replace_all(feature, "[\\.]", "_")) %>%
-      dplyr::filter(feature %in% features) %>%
       dplyr::arrange(feature, sample) %>%
       dplyr::select("feature", "sample", "value")
 
@@ -34,10 +74,4 @@ tcag_build_features_to_samples_files <- function() {
     "tcga_features_to_samples.feather",
     "syn22125635"
   )
-
-  ### Clean up ###
-  # Data
-  rm(tcga_features_to_samples, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

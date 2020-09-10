@@ -15,7 +15,11 @@ tcga_build_features_files <- function() {
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
       feather::read_feather(.) %>%
-      dplyr::filter(VariableType == "Numeric", !is.na(FriendlyLabel)) %>%
+      dplyr::filter(
+        VariableType == "Numeric",
+        !is.na(FriendlyLabel),
+        .data$`Variable Class` != "clinical"
+      ) %>%
       dplyr::select(
         "name" = "FeatureMatrixLabelTSV",
         "display" = "FriendlyLabel",
@@ -59,15 +63,9 @@ tcga_build_features_files <- function() {
     return(features)
   }
 
-  .GlobalEnv$features <- iatlas.data::synapse_store_feather_file(
+  iatlas.data::synapse_store_feather_file(
     get_features(),
     "tcga_features.feather",
     "syn22125617"
   )
-
-  ### Clean up ###
-  # Data
-  rm(features, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }

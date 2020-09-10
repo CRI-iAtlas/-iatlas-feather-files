@@ -18,6 +18,7 @@ build_tcga_immunomodulator_publications <- function(){
     purrr::map(easyPubMed::article_to_df) %>%
     purrr::map(dplyr::slice, 1) %>%
     dplyr::bind_rows() %>%
+    dplyr::as_tibble() %>%
     dplyr::select(
       "do_id" = "doi",
       "pubmed_id" = "pmid",
@@ -30,7 +31,8 @@ build_tcga_immunomodulator_publications <- function(){
       .data$do_id == "",
       NA_character_,
       .data$do_id
-    ))
+    )) %>%
+    tidyr::unite("name", "do_id", "pubmed_id", remove = F)
 
   iatlas.data::synapse_store_feather_file(
     tbl,
