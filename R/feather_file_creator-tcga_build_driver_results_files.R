@@ -46,6 +46,7 @@ tcag_build_driver_results_files <- function() {
         "(NS)",
         mutation_code
       )) %>%
+      dplyr::mutate("feature" = stringr::str_replace_all(.data$feature, "[\\.]", "_")) %>%
       dplyr::left_join(genes, by = "hgnc") %>%
       dplyr::select(-c("hgnc", "label")) %>%
       dplyr::select("entrez", "feature", "mutation_code", "tag", dplyr::everything()) %>%
