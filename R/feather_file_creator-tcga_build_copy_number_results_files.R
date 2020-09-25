@@ -9,8 +9,9 @@ tcag_build_copy_number_results_files <- function() {
   get_results <- function() {
     cat(crayon::magenta(paste0("Get driver results")), fill = TRUE)
 
-    entrez_ids <- "syn21788372" %>%
-      iatlas.data::synapse_delimited_id_to_tbl(.) %>%
+    entrez_ids <- "syn22240716" %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
+      dplyr::filter(!is.na(hgnc)) %>%
       dplyr::pull("entrez")
 
     cat_results_status("Get the initial values from the copy_number_results table.")
@@ -31,12 +32,4 @@ tcag_build_copy_number_results_files <- function() {
     "tcga_copy_number_results.feather",
     "syn22125983"
   )
-
-
-
-  ### Clean up ###
-  # Data
-  rm(tcga_copy_number_results, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }
