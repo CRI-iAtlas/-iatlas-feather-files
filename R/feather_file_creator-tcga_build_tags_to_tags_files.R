@@ -48,7 +48,6 @@ tcga_build_tags_to_tags_files <- function() {
 
     tags6 <- dplyr::tribble(
       ~tag,                    ~related_tag,
-      "TCGA",                  "dataset",
       "extracellular_network", "network",
       "cellimage_network",     "network"
     )

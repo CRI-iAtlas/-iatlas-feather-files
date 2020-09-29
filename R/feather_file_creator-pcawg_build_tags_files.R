@@ -11,11 +11,16 @@ pcawg_build_tags_files <- function() {
       dplyr::distinct() %>%
       dplyr::filter(!stringr::str_detect(name, "C[:digit:]")) %>%
       dplyr::filter(name != "PCAWG") %>%
-      dplyr::add_row(name = "PCAWG_Study") %>%
       dplyr::mutate(
         "display" = name,
         "short_display" = name,
         "long_display" = name
+      ) %>%
+      dplyr::add_row(
+        name = "PCAWG_Study",
+        display = "PCAWG Study",
+        short_display = "PCAWG Study",
+        long_display = "PCAWG Study"
       ) %>%
       dplyr::arrange(name)
 

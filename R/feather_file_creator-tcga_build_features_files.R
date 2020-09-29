@@ -17,8 +17,7 @@ tcga_build_features_files <- function() {
       feather::read_feather(.) %>%
       dplyr::filter(
         VariableType == "Numeric",
-        !is.na(FriendlyLabel),
-        .data$`Variable Class` != "clinical"
+        !is.na(FriendlyLabel)
       ) %>%
       dplyr::select(
         "name" = "FeatureMatrixLabelTSV",
@@ -34,6 +33,7 @@ tcga_build_features_files <- function() {
         class = dplyr::if_else(display %in% c("OS", "PFI"), "Survival Status", class),
         class = dplyr::if_else(display %in% c("OS Time", "PFI Time"), "Survival Time", class)
       ) %>%
+      dplyr::filter(.data$class != "Clinical") %>%
       dplyr::left_join(methods, by = "origin") %>%
       dplyr::select(
         "name", "display", "class", "method_tag", "order", "unit"
