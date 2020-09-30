@@ -57,7 +57,7 @@ tcga_build_genes_to_samples_files <- function() {
   .GlobalEnv$pcawg_genes_to_samples <- iatlas.data::synapse_store_feather_file(
     get_genes_to_samples(),
     "tcga_genes_to_samples.feather",
-    "syn22130980"
+    "syn22125645"
   )
 
 
