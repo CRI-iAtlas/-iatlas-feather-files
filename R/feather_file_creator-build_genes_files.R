@@ -27,9 +27,7 @@ build_genes <- function(){
     dplyr::slice(1) %>%
     dplyr::ungroup()
 
-  entrez_to_hgnc <- "syn21788372" %>%
-    iatlas.data::synapse_delimited_id_to_tbl(.) %>%
-    dplyr::select("entrez", "hgnc")
+  hgnc_to_entrez <- iatlas.data::synapse_feather_id_to_tbl("syn22240716")
 
   tbl <-
     purrr::reduce(
@@ -37,7 +35,7 @@ build_genes <- function(){
       dplyr::full_join,
       by = "entrez"
     ) %>%
-    dplyr::right_join(entrez_to_hgnc, by = "entrez") %>%
+    dplyr::right_join(hgnc_to_entrez, by = "entrez") %>%
     dplyr::select("entrez", "hgnc", dplyr::everything())
 
   iatlas.data::synapse_store_feather_file(tbl, "genes.feather", "syn22125640")
