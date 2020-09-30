@@ -39,19 +39,21 @@ tcga_build_genes_to_samples_files <- function() {
       ) %>%
       tidyr::drop_na()
 
-    copy_number <- "syn22889333" %>%
-      synapse_delimited_id_to_tbl() %>%
-      dplyr::select(-'Locus ID', -'Cytoband') %>%
-      dplyr::rename_with(~stringr::str_sub(.x, 1, 12)) %>%
-      dplyr::rename("hgnc" = "Gene Symbol") %>%
-      dplyr::inner_join(tcga_hgnc_to_entrez, by = "hgnc") %>%
-      dplyr::select(dplyr::any_of(c("entrez", tcga_samples))) %>%
-      tidyr::pivot_longer(
-        -"entrez", names_to = "sample", values_to = "copy_number"
-      ) %>%
-      tidyr::drop_na()
+    return(expression)
 
-    dplyr::full_join(expression, copy_number, by = c("entrez", "sample"))
+    # copy_number <- "syn22889333" %>%
+    #   synapse_delimited_id_to_tbl() %>%
+    #   dplyr::select(-'Locus ID', -'Cytoband') %>%
+    #   dplyr::rename_with(~stringr::str_sub(.x, 1, 12)) %>%
+    #   dplyr::rename("hgnc" = "Gene Symbol") %>%
+    #   dplyr::inner_join(tcga_hgnc_to_entrez, by = "hgnc") %>%
+    #   dplyr::select(dplyr::any_of(c("entrez", tcga_samples))) %>%
+    #   tidyr::pivot_longer(
+    #     -"entrez", names_to = "sample", values_to = "copy_number"
+    #   ) %>%
+    #   tidyr::drop_na()
+    #
+    # dplyr::full_join(expression, copy_number, by = c("entrez", "sample"))
   }
 
   .GlobalEnv$pcawg_genes_to_samples <- iatlas.data::synapse_store_feather_file(
