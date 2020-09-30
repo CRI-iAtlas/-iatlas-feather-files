@@ -19,10 +19,6 @@ get_pcawg_samples_cached <- function(){
   )
 }
 
-get_pcawg_rnaseq_cached <- function(){
-  iatlas.data::result_cached("pcawg_rnaseq", iatlas.data::get_pcawg_rnaseq_from_synapse())
-}
-
 get_pcawg_cibersort_cached <- function(){
   iatlas.data::result_cached("pcawg_cibersort", iatlas.data::get_pcawg_cibersort_from_synapse())
 }
