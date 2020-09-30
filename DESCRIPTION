@@ -25,7 +25,6 @@ Imports:
     feather,
     magrittr,
     purrr,
-    reticulate,
     rlang,
     stringi,
     tibble,
