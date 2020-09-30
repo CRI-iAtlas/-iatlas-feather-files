@@ -1,3 +1,5 @@
+
+devtools::load_all()
 require(rlang)
 require(magrittr)
 

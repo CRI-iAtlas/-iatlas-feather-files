@@ -1,71 +1,65 @@
 tcga_build_genes_to_samples_files <- function() {
-  # # Create a global variable to hold the pool DB connection.
-  # .GlobalEnv$pool <- iatlas.data::connect_to_db()
-  # cat(crayon::green("Created DB connection."), fill = TRUE)
-  #
-  # cat_genes_to_samples_status <- function(message) {
-  #   cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  # }
-  #
-  # get_genes_to_samples <- function() {
-  #   current_pool <- pool::poolCheckout(.GlobalEnv$pool)
-  #
-  #   cat(crayon::magenta(paste0("Get genes_to_samples.")), fill = TRUE)
-  #
-  #   cat_genes_to_samples_status("Get the initial values from the genes_to_samples table.")
-  #   genes_to_samples <- current_pool %>% dplyr::tbl("genes_to_samples")
-  #
-  #   cat_genes_to_samples_status("Get the gene entrezs from the genes table.")
-  #   genes_to_samples <- genes_to_samples %>% dplyr::left_join(
-  #     current_pool %>% dplyr::tbl("genes") %>%
-  #       dplyr::select(gene_id = id, entrez),
-  #     by = "gene_id"
-  #   )
-  #
-  #   cat_genes_to_samples_status("Get the samples from the samples table.")
-  #   genes_to_samples <- genes_to_samples %>% dplyr::left_join(
-  #     current_pool %>% dplyr::tbl("samples") %>%
-  #       dplyr::select(sample_id = id, sample = name),
-  #     by = "sample_id"
-  #   )
-  #
-  #   cat_genes_to_samples_status("Clean up the data set.")
-  #   genes_to_samples <- genes_to_samples %>%
-  #     dplyr::distinct(entrez, sample, rna_seq_expr) %>%
-  #     dplyr::arrange(entrez, sample)
-  #
-  #   cat_genes_to_samples_status("Execute the query and return a tibble.")
-  #   genes_to_samples <- genes_to_samples %>% dplyr::as_tibble()
-  #
-  #   pool::poolReturn(current_pool)
-  #
-  #   return(genes_to_samples)
-  # }
-  #
-  # all_genes_to_samples <- get_genes_to_samples()
-  # all_genes_to_samples <- all_genes_to_samples %>%
-  #   split(rep(1:3, each = ceiling(length(all_genes_to_samples)/2.5)))
-  #
-  # # Setting these to the GlobalEnv just for development purposes.
-  # .GlobalEnv$genes_to_samples_01 <- all_genes_to_samples %>% .[[1]] %>%
-  #   feather::write_feather(paste0(getwd(), "/feather_files/relationships/genes_to_samples/genes_to_samples_01.feather"))
-  #
-  # .GlobalEnv$genes_to_samples_02 <- all_genes_to_samples %>% .[[2]] %>%
-  #   feather::write_feather(paste0(getwd(), "/feather_files/relationships/genes_to_samples/genes_to_samples_02.feather"))
-  #
-  # .GlobalEnv$genes_to_samples_03 <- all_genes_to_samples %>% .[[3]] %>%
-  #   feather::write_feather(paste0(getwd(), "/feather_files/relationships/genes_to_samples/genes_to_samples_03.feather"))
-  #
-  # # Close the database connection.
-  # pool::poolClose(.GlobalEnv$pool)
-  # cat(crayon::green("Closed DB connection."), fill = TRUE)
-  #
-  # ### Clean up ###
-  # # Data
-  # rm(pool, pos = ".GlobalEnv")
-  # rm(genes_to_samples_01, pos = ".GlobalEnv")
-  # rm(genes_to_samples_02, pos = ".GlobalEnv")
-  # rm(genes_to_samples_03, pos = ".GlobalEnv")
-  # cat("Cleaned up.", fill = TRUE)
-  # gc()
+
+  cat_results_status <- function(message) {
+    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
+  }
+
+  get_genes_to_samples <- function() {
+
+    all_genes <- "syn22162880" %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
+      dplyr::pull("entrez")
+
+    tcga_hgnc_to_entrez <- iatlas.data::synapse_feather_id_to_tbl("syn22133677") %>%
+      tidyr::drop_na() %>%
+      dplyr::filter(.data$entrez %in% all_genes) %>%
+      dplyr::mutate("entrez" = as.integer(.data$entrez))
+
+    tcga_samples <- "syn22139885" %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
+      dplyr::pull("name")
+
+    tcga_aliquots <- "syn21435422" %>%
+      synapse_delimited_id_to_tbl() %>%
+      dplyr::rename("patient" = 1, "aliqout" = 2) %>%
+      tidyr::drop_na() %>%
+      dplyr::pull("aliqout")
+
+    expression <- "syn22890627" %>%
+      synapse_delimited_id_to_tbl() %>%
+      tidyr::separate("gene_id", sep = "\\|", into = c("hgnc", "entrez")) %>%
+      dplyr::mutate("entrez" = as.integer(.data$entrez)) %>%
+      dplyr::select(-"hgnc") %>%
+      dplyr::filter(.data$entrez %in% all_genes) %>%
+      dplyr::select(dplyr::any_of(c("entrez", tcga_aliquots))) %>%
+      dplyr::rename_with(~stringr::str_sub(.x, 1, 12)) %>%
+      dplyr::select(dplyr::any_of(c("entrez", tcga_samples[1:65]))) %>%
+      tidyr::pivot_longer(
+        -"entrez", names_to = "sample", values_to = "rna_seq_expr"
+      ) %>%
+      tidyr::drop_na()
+
+    copy_number <- "syn22889333" %>%
+      synapse_delimited_id_to_tbl() %>%
+      dplyr::select(-'Locus ID', -'Cytoband') %>%
+      dplyr::rename_with(~stringr::str_sub(.x, 1, 12)) %>%
+      dplyr::rename("hgnc" = "Gene Symbol") %>%
+      dplyr::inner_join(tcga_hgnc_to_entrez, by = "hgnc") %>%
+      dplyr::select(dplyr::any_of(c("entrez", tcga_samples[1:65]))) %>%
+      tidyr::pivot_longer(
+        -"entrez", names_to = "sample", values_to = "copy_number"
+      ) %>%
+      tidyr::drop_na()
+
+    dplyr::full_join(expression, copy_number, by = c("entrez", "sample"))
+  }
+
+  .GlobalEnv$pcawg_genes_to_samples <- iatlas.data::synapse_store_feather_file(
+    get_genes_to_samples(),
+    "tcga_genes_to_samples.feather",
+    "syn22891553"
+  )
+
+
+
 }
