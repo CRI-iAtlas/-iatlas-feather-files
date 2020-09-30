@@ -23,6 +23,13 @@
       "Repository": "CRAN",
       "Hash": "85738c69035e67ec4b484a5e02640ef6"
     },
+    "MASS": {
+      "Package": "MASS",
+      "Version": "7.3-53",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d1bc1c8e9c0ace57ec9ffea01021d45f"
+    },
     "Matrix": {
       "Package": "Matrix",
       "Version": "1.2-18",
@@ -359,6 +366,13 @@
       "Repository": "CRAN",
       "Hash": "58baa74e4603fcfb9a94401c58c8f9b1"
     },
+    "mgcv": {
+      "Package": "mgcv",
+      "Version": "1.8-33",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "eb7b6439bc6d812eed2cddba5edc6be3"
+    },
     "mime": {
       "Package": "mime",
       "Version": "0.9",
@@ -489,7 +503,8 @@
       "Package": "renv",
       "Version": "0.12.0",
       "Source": "Repository",
-      "Repository": "CRAN"
+      "Repository": "CRAN",
+      "Hash": "7340c71f46a0fd16506cfa804e224e44"
     },
     "reticulate": {
       "Package": "reticulate",

@@ -28,6 +28,5 @@ Imports:
     reticulate,
     rlang,
     stringi,
-    testthat,
     tibble,
     tidyr
