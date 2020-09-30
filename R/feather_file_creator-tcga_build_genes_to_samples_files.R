@@ -33,7 +33,7 @@ tcga_build_genes_to_samples_files <- function() {
       dplyr::filter(.data$entrez %in% all_genes) %>%
       dplyr::select(dplyr::any_of(c("entrez", tcga_aliquots))) %>%
       dplyr::rename_with(~stringr::str_sub(.x, 1, 12)) %>%
-      dplyr::select(dplyr::any_of(c("entrez", tcga_samples[1:65]))) %>%
+      dplyr::select(dplyr::any_of(c("entrez", tcga_samples))) %>%
       tidyr::pivot_longer(
         -"entrez", names_to = "sample", values_to = "rna_seq_expr"
       ) %>%
@@ -45,7 +45,7 @@ tcga_build_genes_to_samples_files <- function() {
       dplyr::rename_with(~stringr::str_sub(.x, 1, 12)) %>%
       dplyr::rename("hgnc" = "Gene Symbol") %>%
       dplyr::inner_join(tcga_hgnc_to_entrez, by = "hgnc") %>%
-      dplyr::select(dplyr::any_of(c("entrez", tcga_samples[1:65]))) %>%
+      dplyr::select(dplyr::any_of(c("entrez", tcga_samples))) %>%
       tidyr::pivot_longer(
         -"entrez", names_to = "sample", values_to = "copy_number"
       ) %>%
