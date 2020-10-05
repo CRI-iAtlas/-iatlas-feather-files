@@ -29,10 +29,10 @@
     },
     "PythonEmbedInR": {
       "Package": "PythonEmbedInR",
-      "Version": "0.5.73",
+      "Version": "0.4.65",
       "Source": "Repository",
       "Repository": null,
-      "Hash": "ca990ca61d8ce7c99fc8e77335bee67d"
+      "Hash": "e8c861e8e62267011701d3257917221e"
     },
     "R6": {
       "Package": "R6",
@@ -47,6 +47,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "125dc7a0ed375eb68c0ce533b48d291f"
+    },
+    "arrow": {
+      "Package": "arrow",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "efda15fcd9c09800b3cc8fa301a43dde"
     },
     "askpass": {
       "Package": "askpass",
@@ -75,6 +82,20 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
+    },
+    "bit": {
+      "Package": "bit",
+      "Version": "4.0.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f36715f14d94678eea9933af927bc15d"
+    },
+    "bit64": {
+      "Package": "bit64",
+      "Version": "4.0.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "9fe98599ca456d6552421db0d6772d8f"
     },
     "brew": {
       "Package": "brew",
@@ -540,10 +561,10 @@
     },
     "synapser": {
       "Package": "synapser",
-      "Version": "0.8.71",
+      "Version": "0.7.64",
       "Source": "Repository",
       "Repository": null,
-      "Hash": "b736c620112ba1ce3332e7d5a180818c"
+      "Hash": "14184ce30e919400dffde92e499db042"
     },
     "sys": {
       "Package": "sys",

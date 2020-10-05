@@ -66,7 +66,7 @@ tcag_build_features_to_samples_files1 <- function() {
     features_to_samples <- "syn22128019" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      arrow::read_feather(.) %>%
       dplyr::rename_all(~stringr::str_replace_all(.x, "[\\.]", "_")) %>%
       dplyr::mutate("Tumor_fraction" = 1 - .data$Stromal_Fraction) %>%
       dplyr::rename("sample" = "ParticipantBarcode") %>%

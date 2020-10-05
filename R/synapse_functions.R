@@ -1,5 +1,5 @@
 synapse_store_feather_file <- function(df, file_name, parent_id){
-  feather::write_feather(df, file_name)
+  arrow::write_feather(df, file_name)
   iatlas.data::synapse_store_file(file_name, parent_id)
   file.remove(file_name)
 }
@@ -15,7 +15,7 @@ synapse_feather_id_to_tbl <- function(id) {
   id %>%
     synapser::synGet() %>%
     purrr::pluck("path") %>%
-    feather::read_feather(.) %>%
+    arrow::read_feather(.) %>%
     dplyr::as_tibble()
 }
 

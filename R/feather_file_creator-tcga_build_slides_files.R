@@ -7,7 +7,7 @@ tcga_build_slides_files <- function() {
     slides <- "syn22128019" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      arrow::read_feather(.) %>%
       dplyr::select(
         "patient_barcode" = "ParticipantBarcode",
         "name" = "Slide"

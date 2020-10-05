@@ -17,17 +17,13 @@ tcga_build_genes_to_samples_files <- function() {
 
     tcga_samples <- "syn22139885" %>%
       iatlas.data::synapse_feather_id_to_tbl(.) %>%
-      dplyr::pull("name") %>%
-      sort() %>%
-      .[1:1000]
+      dplyr::pull("name")
 
     tcga_aliquots <- "syn21435422" %>%
       synapse_delimited_id_to_tbl() %>%
       dplyr::rename("patient" = 1, "aliqout" = 2) %>%
       tidyr::drop_na() %>%
-      dplyr::pull("aliqout") %>%
-      sort() %>%
-      .[1:1000]
+      dplyr::pull("aliqout")
 
     expression <- "syn22890627" %>%
       synapse_delimited_id_to_tbl() %>%
@@ -55,17 +51,14 @@ tcga_build_genes_to_samples_files <- function() {
       ) %>%
       tidyr::drop_na()
 
-    x <- dplyr::full_join(expression, copy_number, by = c("entrez", "sample"))
+    dplyr::full_join(expression, copy_number, by = c("entrez", "sample"))
   }
 
   iatlas.data::synapse_store_feather_file(
-    # get_genes_to_samples(),
-    x,
+    get_genes_to_samples(),
     "tcga_genes_to_samples.feather",
     # "syn22125645",
     "syn22923960"
   )
-
-
 
 }

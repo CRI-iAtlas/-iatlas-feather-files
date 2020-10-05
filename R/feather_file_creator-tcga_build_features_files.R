@@ -14,7 +14,7 @@ tcga_build_features_files <- function() {
     features <- "syn22128265" %>%
       .GlobalEnv$synapse$get() %>%
       purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      arrow::read_feather(.) %>%
       dplyr::filter(
         VariableType == "Numeric",
         !is.na(FriendlyLabel)
