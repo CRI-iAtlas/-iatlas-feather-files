@@ -1,8 +1,8 @@
 get_pcawg_tags_from_synapse <- function() {
-  iatlas.data::create_global_synapse_connection()
+  synapser::synLogin()
   # Get the data from Synapse.
   pcawg_tags_synapse <- "syn20717211" %>%
-    .GlobalEnv$synapse$get() %>%
+    synapser::synGet() %>%
     purrr::pluck("path") %>%
     read.table(stringsAsFactors = F, header = T, sep = "\t") %>%
     dplyr::as_tibble() %>%

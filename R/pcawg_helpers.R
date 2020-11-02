@@ -1,10 +1,10 @@
 get_pcawg_sample_tbl_cached <- function(){
-  iatlas.data::create_global_synapse_connection()
+  synapser::synLogin()
   iatlas.data::result_cached(
     "pcawg_sample_tbl",
     "syn21785582" %>%
-      .GlobalEnv$synapse$get() %>%
-      .$path %>%
+      synapser::synGet() %>%
+      purrr::pluck("path") %>%
       read.csv(sep = "\t", stringsAsFactors = F) %>%
       dplyr::as_tibble()
   )
