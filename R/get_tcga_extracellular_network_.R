@@ -16,6 +16,11 @@ get_tcga_extracellular_network_nodes <- function() {
     "T_cells_CD8"
   )
 
+  tcga_tags <- "syn23545011" %>%
+    iatlas.data::synapse_feather_id_to_tbl(.) %>%
+    dplyr::select("tag" = "old_name", "new_tag" = "name") %>%
+    tidyr::drop_na()
+
   node_tbl <-
     c("syn21781358", "syn21781359", "syn21781360", "syn21781362") %>%
     purrr::map(iatlas.data::synapse_feather_id_to_tbl) %>%
@@ -37,7 +42,11 @@ get_tcga_extracellular_network_nodes <- function() {
         T ~ label
       )
     ) %>%
-    dplyr::filter(!is.na(tag))
+    dplyr::filter(!is.na(tag)) %>%
+    dplyr::left_join(tcga_tags, by = "tag") %>%
+    dplyr::select(-"tag") %>%
+    dplyr::rename("tag" = "new_tag")
+
 
   feature_node_tbl <- node_tbl %>%
     dplyr::filter(label == "Cell") %>%

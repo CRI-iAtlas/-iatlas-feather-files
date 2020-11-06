@@ -1,9 +1,5 @@
 tcag_build_driver_results_files <- function() {
 
-  cat_results_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
-
   get_results <- function() {
 
     tcga_genes <- iatlas.data::synapse_feather_id_to_tbl("syn22133677") %>%
@@ -18,6 +14,11 @@ tcag_build_driver_results_files <- function() {
         tcga_genes,
         dplyr::filter(new_genes, !hgnc %in% tcga_genes$hgnc)
       )
+
+    tcga_tags <- "syn23545011" %>%
+      iatlas.data::synapse_feather_id_to_tbl(.) %>%
+      dplyr::select("tag" = "old_name", "new_tag" = "name") %>%
+      tidyr::drop_na()
 
     driver_results <- "syn22126068" %>%
       synapse_rds_id_tbl() %>%
@@ -51,7 +52,10 @@ tcag_build_driver_results_files <- function() {
       dplyr::select(-c("hgnc", "label")) %>%
       dplyr::select("entrez", "feature", "mutation_code", "tag", dplyr::everything()) %>%
       dplyr::distinct() %>%
-      dplyr::mutate(dataset = "TCGA")
+      dplyr::mutate(dataset = "TCGA") %>%
+      dplyr::inner_join(tcga_tags, by = "tag") %>%
+      dplyr::select(-"tag") %>%
+      dplyr::rename("tag" = "new_tag")
 
     return(driver_results)
   }

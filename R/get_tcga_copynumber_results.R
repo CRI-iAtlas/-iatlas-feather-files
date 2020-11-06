@@ -1,6 +1,6 @@
 get_tcga_copynumber_results <- function() {
   paths <- c("syn21781426", "syn21781395", "syn21781409") %>%
-    purrr::map(.GlobalEnv$synapse$get) %>%
+    purrr::map(synapser::synGet) %>%
     purrr::map(purrr::pluck, "path")
 
   purrr::walk(paths, load)

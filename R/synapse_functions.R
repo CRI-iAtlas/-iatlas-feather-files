@@ -30,7 +30,7 @@ synapse_delimited_id_to_tbl <- function(id, delim = "\t") {
 synapse_rds_id_tbl <- function(id) {
   synapser::synLogin()
   id %>%
-    synapser::synGet %>%
+    synapser::synGet() %>%
     purrr::pluck("path") %>%
     readRDS() %>%
     dplyr::as_tibble()

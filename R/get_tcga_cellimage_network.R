@@ -14,7 +14,7 @@ get_tcga_cellimage_nodes <- function() {
 
   position_tbl <- iatlas.data::synapse_feather_id_to_tbl("syn21781366")
   nodes_tbl    <- get_tcga_extracellular_network_nodes() %>%
-    dplyr::select(tag, tag2, feature, entrez, label, score)
+    dplyr::select(tag, tag_2, feature, entrez, label, score)
   label_tbl    <- iatlas.data::synapse_feather_id_to_tbl("syn21782167")
 
   cellimage_nodes <- label_tbl %>%
@@ -57,7 +57,7 @@ get_tcga_cellimage_nodes <- function() {
     dplyr::mutate(
       dataset = "TCGA",
       "network" = "cellimage_network",
-      "id" = 1:dplyr::n()
+      "name" = stringr::str_c("tcga_ecn_", 1:dplyr::n())
     )
 }
 
@@ -74,11 +74,11 @@ get_tcga_cellimage_edges <- function() {
     "T_cells_CD8"
   )
   extracellular_nodes_tbl <- get_tcga_extracellular_network_nodes() %>%
-    dplyr::select(feature, entrez, id)
+    dplyr::select(feature, entrez, name)
   extracellular_edges_tbl <- get_tcga_extracellular_network_edges() %>%
     dplyr::select(node1, node2, score)
   cellimage_nodes_tbl     <- get_tcga_cellimage_nodes() %>%
-    dplyr::select(feature, entrez, id)
+    dplyr::select(feature, entrez, name)
 
   cellimage_edges_tbl1 <- "syn21782167" %>%
     iatlas.data::synapse_feather_id_to_tbl() %>%

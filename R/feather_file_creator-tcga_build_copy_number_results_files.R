@@ -2,33 +2,40 @@ tcag_build_copy_number_results_files <- function() {
 
   require(magrittr)
 
-  cat_results_status <- function(message) {
-    cat(crayon::cyan(paste0(" - ", message)), fill = TRUE)
-  }
 
-  get_results <- function() {
-    cat(crayon::magenta(paste0("Get driver results")), fill = TRUE)
+  entrez_ids <- "syn22240716" %>%
+    iatlas.data::synapse_feather_id_to_tbl(.) %>%
+    dplyr::filter(!is.na(hgnc)) %>%
+    dplyr::pull("entrez")
 
-    entrez_ids <- "syn22240716" %>%
-      iatlas.data::synapse_feather_id_to_tbl(.) %>%
-      dplyr::filter(!is.na(hgnc)) %>%
-      dplyr::pull("entrez")
+  copy_number_results <- iatlas.data::get_tcga_copynumber_results_cached()
 
-    cat_results_status("Get the initial values from the copy_number_results table.")
-    copy_number_results <- iatlas.data::get_tcga_copynumber_results_cached()
+  tcga_tags <- "syn23545011" %>%
+    iatlas.data::synapse_feather_id_to_tbl(.) %>%
+    dplyr::select("tag" = "old_name", "new_tag" = "name") %>%
+    tidyr::drop_na()
 
-    cat_results_status("Clean up the data set.")
-    copy_number_results <- copy_number_results %>%
-      dplyr::distinct(entrez, feature, tag, direction, mean_normal, mean_cnv, p_value, log10_p_value, t_stat) %>%
-      dplyr::arrange(entrez, feature, tag, direction) %>%
-      dplyr::mutate(dataset = "TCGA") %>%
-      dplyr::filter(entrez %in% entrez_ids)
+  copy_number_results_formated <- copy_number_results %>%
+    dplyr::distinct(
+      entrez,
+      feature,
+      tag,
+      direction,
+      mean_normal,
+      mean_cnv,
+      p_value,
+      log10_p_value,
+      t_stat
+    ) %>%
+    dplyr::filter(entrez %in% entrez_ids) %>%
+    dplyr::inner_join(tcga_tags, by = "tag") %>%
+    dplyr::select(-"tag") %>%
+    dplyr::rename("tag" = "new_tag") %>%
+    dplyr::arrange(entrez, feature, tag, direction) %>%
+    dplyr::mutate(dataset = "TCGA")
 
-    return(copy_number_results)
-  }
-
-  .GlobalEnv$pcawg_samples_to_tags <- iatlas.data::synapse_store_feather_file(
-    get_results(),
+  iatlas.data::synapse_store_feather_file(
+    copy_number_results_formated,
     "tcga_copy_number_results.feather",
     "syn22125983"
   )
