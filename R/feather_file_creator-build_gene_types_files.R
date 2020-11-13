@@ -1,8 +1,17 @@
-build_genes_synapse_table <- function(){
+build_genes_types_file <- function(){
   require(magrittr)
 
-  wolf <- iatlas.data::synapse_delimited_id_to_tbl("syn22151547")
-  yasin <- iatlas.data::synapse_delimited_id_to_tbl("syn22151548")
+  wolf <- iatlas.data::synapse_delimited_id_to_tbl("syn22240714")
+  yasin <- iatlas.data::synapse_delimited_id_to_tbl("syn22240715")
+
+  genesets <- dplyr::tribble(
+    ~name,                       ~display,
+    "extracellular_network",     "Extra Cellular Network",
+    "cellimage_network",         "Cellimage Network",
+    "immunomodulator",           "Immunomodulator",
+    "io_target",                 "IO Target",
+    "potential_immunomodulator", "Potential Immunomodulator"
+  )
 
   tbl <-
     dplyr::bind_rows(wolf, yasin) %>%
@@ -13,11 +22,8 @@ build_genes_synapse_table <- function(){
     dplyr::mutate(
       "display" = stringr::str_to_title(stringr::str_replace_all(name, "_", " "))
     ) %>%
-    dplyr::add_row(
-      name = c("extra_cellular_network", "immunomodulator", "io_target", "cellimage_network", "potential_immunomodulator"),
-      display = c("Extra Cellular Network", "Immunomodulator", "IO Target", "Cellimage Network", "Potential Immunomodulator")
-    ) %>%
-    dplyr::arrange(name)
+    dplyr::arrange(name) %>%
+    dplyr::bind_rows(genesets, .)
 
   iatlas.data::synapse_store_feather_file(
     tbl,

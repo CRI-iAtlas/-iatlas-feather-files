@@ -16,12 +16,13 @@ tcga_build_cellimage_nodes_files <- function() {
       "x",
       "y"
     ) %>%
+    dplyr::left_join(tcga_tags, by = "tag") %>%
+    dplyr::select(-"tag") %>%
+    dplyr::rename("tag" = "new_tag") %>%
     dplyr::mutate(
-      dataset = "TCGA",
+      "name" = stringr::str_c("tcga_cin_", .data$tag, "_", .data$node),
+      "dataset" = "TCGA",
       "network" = "cellimage_network",
-      "name" = stringr::str_c("tcga_cin_", 1:dplyr::n())
-    ) %>%
-    dplyr::mutate(
       "entrez" = as.integer(.data$node),
       "feature" = dplyr::if_else(
         is.na(.data$entrez),
@@ -29,10 +30,7 @@ tcga_build_cellimage_nodes_files <- function() {
         NA_character_
       )
     ) %>%
-    dplyr::select(-"node") %>%
-    dplyr::left_join(tcga_tags, by = "tag") %>%
-    dplyr::select(-"tag") %>%
-    dplyr::rename("tag" = "new_tag")
+    dplyr::select(-"node")
 
   iatlas.data::synapse_store_feather_file(
     nodes,

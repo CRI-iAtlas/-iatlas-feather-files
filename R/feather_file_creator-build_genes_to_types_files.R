@@ -26,13 +26,13 @@ build_genes <- function(){
     dplyr::distinct() %>%
     dplyr::mutate(
       "entrez" = as.integer(.data$entrez),
-      "gene_type" = "extra_cellular_network"
+      "gene_type" = "extracellular_network"
     ) %>%
     tidyr::drop_na()
 
   cellimage_network <- "syn23518512" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
-    dplyr::select("From", "To") %>%
+    dplyr::select("from", "to") %>%
     tidyr::pivot_longer(dplyr::everything()) %>%
     dplyr::select("entrez" = "value") %>%
     dplyr::distinct() %>%
@@ -68,7 +68,11 @@ build_genes <- function(){
     ) %>%
     dplyr::filter(entrez %in% entrez_ids)
 
-  iatlas.data::synapse_store_feather_file(tbl, "genes_to_types.feather", "syn22130912")
+  iatlas.data::synapse_store_feather_file(
+    tbl,
+    "genes_to_types.feather",
+    "syn22130912"
+  )
 
 }
 

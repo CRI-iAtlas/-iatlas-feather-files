@@ -2,7 +2,6 @@ tcag_build_copy_number_results_files <- function() {
 
   require(magrittr)
 
-
   entrez_ids <- "syn22240716" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
     dplyr::filter(!is.na(hgnc)) %>%

@@ -4,8 +4,6 @@ pcawg_build_tags_files <- function() {
 
   get_tags <- function() {
 
-    cat(crayon::magenta(paste0("Get PCAWG tags.")), fill = TRUE)
-
     tags <- iatlas.data::get_pcawg_tag_values_cached() %>%
       dplyr::select(name = tag) %>%
       dplyr::distinct() %>%

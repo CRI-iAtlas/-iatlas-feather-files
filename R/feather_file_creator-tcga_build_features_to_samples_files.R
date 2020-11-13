@@ -2,21 +2,13 @@ tcag_build_features_to_samples_files1 <- function() {
 
   get_features_to_samples <- function() {
 
-    cat(crayon::magenta(paste0("Get features_to_samples")), fill = TRUE)
-
-    create_global_synapse_connection()
-
     methods <- "syn22130608" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      synapse_feather_id_to_tbl(.) %>%
       dplyr::select("origin" = "Feature Origin", "method_tag" = "Methods Tag") %>%
       tidyr::drop_na()
 
     features <- "syn22128265" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      synapse_feather_id_to_tbl(.) %>%
       dplyr::filter(
         VariableType == "Numeric",
         !is.na(FriendlyLabel)
@@ -64,9 +56,7 @@ tcag_build_features_to_samples_files1 <- function() {
       dplyr::pull(name)
 
     features_to_samples <- "syn22128019" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      arrow::read_feather(.) %>%
+      synapse_feather_id_to_tbl(.) %>%
       dplyr::rename_all(~stringr::str_replace_all(.x, "[\\.]", "_")) %>%
       dplyr::mutate("Tumor_fraction" = 1 - .data$Stromal_Fraction) %>%
       dplyr::rename("sample" = "ParticipantBarcode") %>%
@@ -79,7 +69,7 @@ tcag_build_features_to_samples_files1 <- function() {
     return(features_to_samples)
   }
 
-  .GlobalEnv$tcga_features_to_samples <- iatlas.data::synapse_store_feather_file(
+  synapse_store_feather_file(
     get_features_to_samples(),
     "tcga_features_to_samples.feather",
     "syn22125635"
