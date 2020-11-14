@@ -1,7 +1,15 @@
 tcga_build_genes_to_samples_files <- function() {
 
-  tcga_genes <- "syn22162918" %>%
+  gene_types <- c(
+    "cellimage_network",
+    "extracellular_network",
+    "io_target",
+    "immunomodulator"
+  )
+
+  genes <- "syn22162918" %>%
     synapse_feather_id_to_tbl(.) %>%
+    dplyr::filter(.data$gene_type %in% gene_types) %>%
     dplyr::pull("entrez") %>%
     unique() %>%
     sort()
@@ -10,7 +18,7 @@ tcga_build_genes_to_samples_files <- function() {
     synapse_feather_id_to_tbl(.) %>%
     dplyr::select("entrez", "sample", "rna_seq_expr") %>%
     tidyr::drop_na() %>%
-    dplyr::filter(.data$entrez %in% tcga_genes)
+    dplyr::filter(.data$entrez %in% genes)
 
   # tcga_hgnc_to_entrez <- iatlas.data::synapse_feather_id_to_tbl("syn22133677") %>%
   #   tidyr::drop_na() %>%
