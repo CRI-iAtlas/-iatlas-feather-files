@@ -1,20 +1,14 @@
 tcga_build_features_files <- function() {
 
   get_features <- function() {
-    create_global_synapse_connection()
-    cat(crayon::magenta(paste0("Get features")), fill = TRUE)
 
     methods <- "syn22130608" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      feather::read_feather(.) %>%
+      synapse_feather_id_to_tbl() %>%
       dplyr::select("origin" = "Feature Origin", "method_tag" = "Methods Tag") %>%
       tidyr::drop_na()
 
     features <- "syn22128265" %>%
-      .GlobalEnv$synapse$get() %>%
-      purrr::pluck("path") %>%
-      arrow::read_feather(.) %>%
+      synapse_feather_id_to_tbl() %>%
       dplyr::filter(
         VariableType == "Numeric",
         !is.na(FriendlyLabel)

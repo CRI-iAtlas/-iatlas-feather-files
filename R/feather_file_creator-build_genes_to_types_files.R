@@ -7,9 +7,10 @@ build_genes <- function(){
     tidyr::drop_na() %>%
     dplyr::mutate("gene_type" = "immunomodulator")
 
-  io_targets <- "syn23518486" %>%
+  io_targets <- "syn22151533" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
-    dplyr::select("entrez") %>%
+    dplyr::select("entrez" = "Entrez ID") %>%
+    dplyr::mutate("entrez" = as.integer(.data$entrez)) %>%
     tidyr::drop_na() %>%
     dplyr::mutate("gene_type" = "io_target")
 
