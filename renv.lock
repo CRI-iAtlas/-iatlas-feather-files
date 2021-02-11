@@ -209,13 +209,6 @@
       "Repository": "CRAN",
       "Hash": "d0509913b27ea898189ee664b6030dc2"
     },
-    "easyPubMed": {
-      "Package": "easyPubMed",
-      "Version": "2.13",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "de016e6d81383949a0571e890ebd864f"
-    },
     "ellipsis": {
       "Package": "ellipsis",
       "Version": "0.3.1",
