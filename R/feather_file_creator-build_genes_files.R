@@ -12,7 +12,6 @@ build_genes <- function(){
       "description" = "Description"
     ) %>%
     dplyr::group_by(.data$entrez) %>%
-    dplyr::slice(1) %>%
     dplyr::mutate("entrez" = as.integer(.data$entrez))
 
   hgnc_to_entrez <- iatlas.data::synapse_feather_id_to_tbl("syn22240716")
