@@ -2,7 +2,18 @@ build_genes <- function(){
   require(magrittr)
 
   immunomodulators <- iatlas.data::synapse_feather_id_to_tbl("syn23518460")
-  io_targets <- iatlas.data::synapse_feather_id_to_tbl("syn23518486")
+  io_targets <-
+    iatlas.data::synapse_feather_id_to_tbl("syn22151533") %>%
+    dplyr::select(
+      "entrez" = "Entrez ID",
+      "io_landscape_name" = "Friendly Name",
+      "pathway" = "Pathway",
+      "therapy_type" = "Therapy Type",
+      "description" = "Description"
+    ) %>%
+    dplyr::group_by(.data$entrez) %>%
+    dplyr::slice(1) %>%
+    dplyr::mutate("entrez" = as.integer(.data$entrez))
 
   hgnc_to_entrez <- iatlas.data::synapse_feather_id_to_tbl("syn22240716")
 
