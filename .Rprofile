@@ -21,3 +21,9 @@ if (file.exists("renv/activate.R")) {
 }
 
 rm(IS_CI)
+
+if (interactive()) {
+  suppressMessages(require(devtools))
+  suppressMessages(require(testthat))
+  suppressMessages(require(usethis))
+}
