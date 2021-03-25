@@ -4,7 +4,10 @@ tcga_build_genes_to_samples_files <- function() {
     "cellimage_network",
     "extracellular_network",
     "io_target",
-    "immunomodulator"
+    "immunomodulator",
+    "cibersort_gene",
+    "mcpcounter_gene",
+    "epic_gene",
   )
 
   genes <- "syn22162918" %>%

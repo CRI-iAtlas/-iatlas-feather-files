@@ -10,7 +10,10 @@ build_genes_types_file <- function(){
     "cellimage_network",         "Cellimage Network",
     "immunomodulator",           "Immunomodulator",
     "io_target",                 "IO Target",
-    "potential_immunomodulator", "Potential Immunomodulator"
+    "potential_immunomodulator", "Potential Immunomodulator",
+    "cibersort_gene",            "Cibersort Gene",
+    "mcpcounter_gene",           "MCPcounter Gene",
+    "epic_gene",                 "Epic Gene"
   )
 
   tbl <-
