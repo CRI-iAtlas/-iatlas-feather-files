@@ -2,12 +2,6 @@ tcga_build_features_files <- function() {
 
   get_features <- function() {
 
-    germline_features <- "syn24862433" %>%
-      synapse_feather_id_to_tbl() %>%
-      dplyr::group_by(feature) %>%
-      dplyr::arrange(.data$germline_module) %>%
-      dplyr::slice(1)
-
     methods <- "syn22130608" %>%
       synapse_feather_id_to_tbl() %>%
       dplyr::select("origin" = "Feature Origin", "method_tag" = "Methods Tag") %>%
@@ -58,8 +52,7 @@ tcga_build_features_files <- function() {
           class == "Overall Proportion"
         )
       ) %>%
-      dplyr::arrange(name) %>%
-      dplyr::left_join(germline_features, by = c("name" = "feature"))
+      dplyr::arrange(name)
 
     return(features)
   }
