@@ -25,9 +25,18 @@ tcga_build_features_files <- function() {
         "name" = stringr::str_replace_all(name, "[\\.]", "_"),
         class = dplyr::if_else(is.na(class), "Miscellaneous", class),
         class = dplyr::if_else(display %in% c("OS", "PFI"), "Survival Status", class),
-        class = dplyr::if_else(display %in% c("OS Time", "PFI Time"), "Survival Time", class)
+        class = dplyr::if_else(display %in% c("OS Time", "PFI Time"), "Survival Time", class),
+        display = dplyr::if_else(
+          name == "age_at_initial_pathologic_diagnosis",
+          "Age At Diagnosis",
+          display
+        ),
+        name = dplyr::if_else(
+          name == "age_at_initial_pathologic_diagnosis",
+          "age_at_diagnosis",
+          name
+        )
       ) %>%
-      dplyr::filter(.data$class != "Clinical") %>%
       dplyr::left_join(methods, by = "origin") %>%
       dplyr::select(
         "name", "display", "class", "method_tag", "order", "unit"
