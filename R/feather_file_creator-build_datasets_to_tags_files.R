@@ -6,8 +6,12 @@ build_genes_synapse_table <- function(){
     "Immune_Subtype", "TCGA",
     "TCGA_Subtype",   "TCGA",
     "TCGA_Study",     "TCGA",
+    "gender",         "TCGA",
+    "race",           "TCGA",
+    "ethnicity",      "TCGA",
     "Immune_Subtype", "PCAWG",
-    "PCAWG_Study",    "PCAWG"
+    "PCAWG_Study",    "PCAWG",
+    "gender",         "PCAWG"
   )
 
 
