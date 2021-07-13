@@ -1,10 +1,8 @@
 build_dataset_table <- function(){
   require(magrittr)
 
-  tbl <- "syn21557455" %>%
-    iatlas.data::synapse_feather_id_to_tbl(.) %>%
-    dplyr::select("display" = "Dataset") %>%
-    dplyr::mutate("type" = "ici") %>%
+  tbl <-
+    dplyr::tibble("display" = character(), type = character()) %>%
     dplyr::add_row("display" = c("TCGA", "PCAWG"), "type" = "analysis") %>%
     dplyr::add_row("display" = c("GTEX"), "type" = "other") %>%
     dplyr::mutate("name" = stringr::str_replace_all(.data$display, " ", "_"))

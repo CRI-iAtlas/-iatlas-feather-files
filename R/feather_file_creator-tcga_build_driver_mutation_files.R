@@ -16,19 +16,19 @@ tcga_build_mutations_files <- function() {
       ) %>%
       tidyr::separate(
         "mutation",
-        into = c("hgnc", "mutation_code"),
+        into = c("hgnc", "code"),
         sep = " ",
         fill = "right"
       ) %>%
       dplyr::distinct() %>%
       dplyr::mutate(
-        "mutation_code" = dplyr::if_else(
-          is.na(mutation_code),
+        "code" = dplyr::if_else(
+          is.na(.data$code),
           "(NS)",
-          mutation_code
+          .data$code
         ),
-        "mutation_name" = stringr::str_c(.data$hgnc, ":", .data$mutation_code),
-        "mutation_type" = "driver_mutation"
+        "mutation" = stringr::str_c(.data$hgnc, ":", .data$code),
+        "type" = "driver_mutation"
       ) %>%
       dplyr::inner_join(gene_ids, by = "hgnc") %>%
       dplyr::select(-"hgnc") %>%
@@ -38,39 +38,25 @@ tcga_build_mutations_files <- function() {
   }
 
   get_mutations <- function(sample_to_mutations){
-
-    cat(crayon::magenta(paste0("make driver mutations")), fill = TRUE)
-
-
     mutations <- sample_to_mutations %>%
-      dplyr::select(
-        "name" = "mutation_name",
-        "entrez",
-        "code" = "mutation_code",
-        "type" = "mutation_type"
-      ) %>%
+      dplyr::select("name" = "mutation","entrez","code", "type") %>%
       dplyr::distinct() %>%
       dplyr::arrange(entrez, code)
     return(mutations)
   }
 
   get_mutation_codes <- function(mutations){
-    cat(crayon::magenta(paste0("make driver mutation codes")), fill = TRUE)
-
     mutation_codes <- mutations %>%
       dplyr::select("code") %>%
       dplyr::distinct()
     return(mutation_codes)
   }
 
-
-
-
   samples_to_mutations <-  get_samples_to_mutations()
   mutations <- get_mutations(samples_to_mutations)
   codes <- get_mutation_codes(mutations)
   samples_to_mutations <- samples_to_mutations %>%
-    dplyr::select("sample", "name" = "mutation_name", "status")
+    dplyr::select("sample", "mutation", "status")
 
 
   iatlas.data::synapse_store_feather_file(

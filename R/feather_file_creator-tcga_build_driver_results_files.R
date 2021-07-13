@@ -2,18 +2,8 @@ tcag_build_driver_results_files <- function() {
 
   get_results <- function() {
 
-    tcga_genes <- iatlas.data::synapse_feather_id_to_tbl("syn22133677") %>%
-      dplyr::filter(!is.na(hgnc))
-
-    new_genes <- iatlas.data::synapse_feather_id_to_tbl("syn22240716") %>%
-      dplyr::filter(!is.na(hgnc)) %>%
-      dplyr::select("entrez", "hgnc")
-
-    genes <-
-      dplyr::bind_rows(
-        tcga_genes,
-        dplyr::filter(new_genes, !hgnc %in% tcga_genes$hgnc)
-      )
+    gene_ids <- synapse_read_all_feather_files("syn22125640") %>%
+      dplyr::select("hgnc", "entrez")
 
     tcga_tags <- "syn23545011" %>%
       iatlas.data::synapse_feather_id_to_tbl(.) %>%
@@ -42,17 +32,20 @@ tcag_build_driver_results_files <- function() {
         sep = "\\s",
         remove = TRUE
       ) %>%
-      dplyr::mutate("mutation_code" = ifelse(
-        is.na(mutation_code),
-        "(NS)",
-        mutation_code
-      )) %>%
-      dplyr::mutate("feature" = stringr::str_replace_all(.data$feature, "[\\.]", "_")) %>%
-      dplyr::left_join(genes, by = "hgnc") %>%
-      dplyr::select(-c("hgnc", "label")) %>%
-      dplyr::select("entrez", "feature", "mutation_code", "tag", dplyr::everything()) %>%
+      dplyr::mutate(
+        "mutation_code" = ifelse(
+          is.na(mutation_code),
+          "(NS)",
+          mutation_code
+        ),
+        "mutation" = stringr::str_c(.data$hgnc, ":", .data$mutation_code),
+        "feature" = stringr::str_replace_all(.data$feature, "[\\.]", "_"),
+        "dataset" = "TCGA"
+      ) %>%
+      dplyr::inner_join(gene_ids, by = "hgnc") %>%
+      dplyr::select(-c("hgnc", "label", "entrez",  "mutation_code")) %>%
+      dplyr::select("mutation", "feature", "tag", "dataset", dplyr::everything()) %>%
       dplyr::distinct() %>%
-      dplyr::mutate(dataset = "TCGA") %>%
       dplyr::inner_join(tcga_tags, by = "tag") %>%
       dplyr::select(-"tag") %>%
       dplyr::rename("tag" = "new_tag")
