@@ -3,22 +3,8 @@ tcga_build_mutations_files <- function() {
 
   get_samples_to_mutations <- function() {
 
-    cat(crayon::magenta(paste0("Get driver samples to mutations")), fill = TRUE)
-
-    tcga_gene_ids <- "syn22133677" %>%
-      iatlas.data::synapse_feather_id_to_tbl(.) %>%
-      tidyr::drop_na()
-
-    new_gene_ids <- "syn21788372" %>%
-      iatlas.data::synapse_delimited_id_to_tbl(.) %>%
+    gene_ids <- synapse_read_all_feather_files("syn22125640") %>%
       dplyr::select("hgnc", "entrez")
-
-    gene_ids <- dplyr::bind_rows(
-      tcga_gene_ids,
-      dplyr::filter(new_gene_ids, !hgnc %in% tcga_gene_ids$hgnc)
-    )
-
-    cat(crayon::magenta(paste0("make driver samples to mutations")), fill = TRUE)
 
     samples_to_mutations <- "syn22131029" %>%
       iatlas.data::synapse_feather_id_to_tbl(.) %>%
@@ -29,18 +15,24 @@ tcga_build_mutations_files <- function() {
         names_to = "mutation"
       ) %>%
       tidyr::separate(
-        "mutation", into = c("hgnc", "mutation_code"), sep = " ", fill = "right"
+        "mutation",
+        into = c("hgnc", "mutation_code"),
+        sep = " ",
+        fill = "right"
       ) %>%
       dplyr::distinct() %>%
-      dplyr::mutate(mutation_code = dplyr::if_else(
-        is.na(mutation_code),
-        "(NS)",
-        mutation_code
-      )) %>%
-      tidyr::drop_na() %>%
-      dplyr::left_join(gene_ids, by = "hgnc") %>%
+      dplyr::mutate(
+        "mutation_code" = dplyr::if_else(
+          is.na(mutation_code),
+          "(NS)",
+          mutation_code
+        ),
+        "mutation_name" = stringr::str_c(.data$hgnc, ":", .data$mutation_code),
+        "mutation_type" = "driver_mutation"
+      ) %>%
+      dplyr::inner_join(gene_ids, by = "hgnc") %>%
       dplyr::select(-"hgnc") %>%
-      dplyr::mutate("mutation_type" = "driver_mutation")
+      tidyr::drop_na()
 
     return(samples_to_mutations)
   }
@@ -52,6 +44,7 @@ tcga_build_mutations_files <- function() {
 
     mutations <- sample_to_mutations %>%
       dplyr::select(
+        "name" = "mutation_name",
         "entrez",
         "code" = "mutation_code",
         "type" = "mutation_type"
@@ -70,15 +63,21 @@ tcga_build_mutations_files <- function() {
     return(mutation_codes)
   }
 
+
+
+
   samples_to_mutations <-  get_samples_to_mutations()
+  mutations <- get_mutations(samples_to_mutations)
+  codes <- get_mutation_codes(mutations)
+  samples_to_mutations <- samples_to_mutations %>%
+    dplyr::select("sample", "name" = "mutation_name", "status")
+
 
   iatlas.data::synapse_store_feather_file(
     samples_to_mutations,
     "tcga_samples_to_mutations.feather",
     "syn22140071"
   )
-
-  mutations <- get_mutations(samples_to_mutations)
 
   iatlas.data::synapse_store_feather_file(
     mutations,
@@ -87,14 +86,9 @@ tcga_build_mutations_files <- function() {
   )
 
   iatlas.data::synapse_store_feather_file(
-    get_mutation_codes(mutations),
+    codes,
     "tcga_mutation_codes.feather",
     "syn22131021"
   )
 
-  ### Clean up ###
-  # Data
-  rm(tcga_mutations, pos = ".GlobalEnv")
-  cat("Cleaned up.", fill = TRUE)
-  gc()
 }
