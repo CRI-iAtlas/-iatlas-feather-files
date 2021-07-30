@@ -11,12 +11,14 @@ pcawg_build_tags_files <- function() {
       dplyr::filter(name != "PCAWG") %>%
       dplyr::mutate(
         "short_display" = name,
-        "long_display" = name
+        "long_display" = name,
+        "type" = "group"
       ) %>%
       dplyr::add_row(
         name = "PCAWG_Study",
         short_display = "PCAWG Study",
-        long_display = "PCAWG Study"
+        long_display = "PCAWG Study",
+        "type" = "parent_group"
       ) %>%
       dplyr::arrange(name)
 

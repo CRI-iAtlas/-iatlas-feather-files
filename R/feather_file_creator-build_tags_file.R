@@ -3,17 +3,20 @@ build_tags <- function(){
     dplyr::tibble(
       "name" = character(),
       "short_display" = character(),
-      "long_display" = character()
+      "long_display" = character(),
+      "type" = character()
     ) %>%
     dplyr::add_row(
       "name" = c("extracellular_network", "cellimage_network"),
       "short_display" = c("Extracellular Network", "Cellimage Network"),
-      "long_display" = c("Extracellular Network", "Cellimage Network")
+      "long_display" = c("Extracellular Network", "Cellimage Network"),
+      "type" = "network"
     ) %>%
     dplyr::add_row(
       "name" = c("parent_group", "metagroup", "group", "network"),
       "short_display" = c("Parent Group", "Metagroup", "Group", "Network"),
-      "long_display" = c("Parent Group", "Metagroup", "Group", "Network")
+      "long_display" = c("Parent Group", "Metagroup", "Group", "Network"),
+      "type" = "metagroup"
     )
 
   iatlas.data::synapse_store_feather_file(

@@ -3,16 +3,22 @@ tcga_build_tags_files <- function() {
   group_tags <- "syn23545011" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
     dplyr::select(
-      "name","short_display", "long_display", "color", "characteristics"
+      "name","short_display", "long_display", "color", "characteristics", "type"
     )
 
   clinical_tags <-
-    dplyr::tibble(
-      "name" = c(
-        get_gender_enum(),
-        get_race_enum(),
-        get_ethnicity_enum(),
-        get_clinical_enum()
+    dplyr::bind_rows(
+      dplyr::tibble(
+        "name" = c(
+          get_gender_enum(),
+          get_race_enum(),
+          get_ethnicity_enum()
+        ),
+        "type" = "group"
+      ),
+      dplyr::tibble(
+        "name" = get_clinical_enum(),
+        "type" = "parent_group"
       )
     ) %>%
     dplyr::mutate(
