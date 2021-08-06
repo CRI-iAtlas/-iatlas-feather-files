@@ -1,4 +1,4 @@
-get_tcga_extracellular_network_nodes <- function() {
+get_tcga_stratified_extracellular_network_nodes <- function() {
   require(magrittr)
   labels <- "syn21783989" %>%
     iatlas.data::synapse_feather_id_to_tbl(.) %>%
@@ -22,7 +22,7 @@ get_tcga_extracellular_network_nodes <- function() {
     tidyr::drop_na()
 
   node_tbl <-
-    c("syn21781358", "syn21781359", "syn21781360", "syn21781362") %>%
+    c("syn21781360") %>%
     purrr::map(iatlas.data::synapse_feather_id_to_tbl) %>%
     dplyr::bind_rows() %>%
     dplyr::select(
@@ -62,19 +62,19 @@ get_tcga_extracellular_network_nodes <- function() {
     dplyr::bind_rows(feature_node_tbl, gene_node_tbl) %>%
     dplyr::mutate(
       dataset = "TCGA",
-      "network" = "extracellular_network",
+      "network" = "Extracellular Network",
       "name" = stringr::str_c("tcga_ecn_", 1:dplyr::n())
     )
 }
 
-get_tcga_extracellular_network_edges <- function() {
+get_tcga_stratified_extracellular_network_edges <- function() {
   require(magrittr)
-  nodes_tbl <- get_tcga_extracellular_network_nodes_cached() %>%
+  nodes_tbl <- get_tcga_stratified_extracellular_network_nodes_cached() %>%
     dplyr::select(name, feature, entrez, tag, tag_2) %>%
     dplyr::mutate("entrez" = as.character(entrez))
 
   edges_tbl <-
-    c("syn21781350", "syn21781351", "syn21781354", "syn21781357") %>%
+    c("syn21781354") %>%
     purrr::map(iatlas.data::synapse_feather_id_to_tbl) %>%
     dplyr::bind_rows() %>%
     dplyr::select(

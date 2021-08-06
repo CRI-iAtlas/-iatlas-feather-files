@@ -6,12 +6,8 @@ tcga_build_tags_to_tags_files <- function() {
   clinical_tags <-
     dplyr::bind_rows(
       dplyr::tibble("tag" = get_gender_enum(), "related_tag" = "gender"),
-      dplyr::tibble("tag" = get_gender_enum(), "related_tag" = "group"),
       dplyr::tibble("tag" = get_race_enum(), "related_tag" = "race"),
-      dplyr::tibble("tag" = get_race_enum(), "related_tag" = "group"),
-      dplyr::tibble("tag" = get_ethnicity_enum(), "related_tag" = "ethnicity"),
-      dplyr::tibble("tag" = get_ethnicity_enum(), "related_tag" = "group"),
-      dplyr::tibble("tag" = get_clinical_enum(), "related_tag" = "parent_group"),
+      dplyr::tibble("tag" = get_ethnicity_enum(), "related_tag" = "ethnicity")
     )
 
   tags_to_tags <- dplyr::bind_rows(group_tags, clinical_tags)
