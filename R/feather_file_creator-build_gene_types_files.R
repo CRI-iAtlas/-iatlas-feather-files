@@ -5,15 +5,16 @@ build_genes_types_file <- function(){
   yasin <- iatlas.data::synapse_delimited_id_to_tbl("syn22240715")
 
   genesets <- dplyr::tribble(
-    ~name,                       ~display,
-    "extracellular_network",     "Extra Cellular Network",
-    "cellimage_network",         "Cellimage Network",
-    "immunomodulator",           "Immunomodulator",
-    "io_target",                 "IO Target",
-    "potential_immunomodulator", "Potential Immunomodulator",
-    "cibersort_gene",            "Cibersort Gene",
-    "mcpcounter_gene",           "MCPcounter Gene",
-    "epic_gene",                 "Epic Gene"
+    ~name,                            ~display,
+    "extracellular_network",          "Extra Cellular Network",
+    "cellimage_network",              "Cellimage Network",
+    "immunomodulator",                "Immunomodulator",
+    "io_target",                      "IO Target",
+    "potential_immunomodulator",      "Potential Immunomodulator",
+    "cibersort_gene",                 "Cibersort Gene",
+    "mcpcounter_gene",                "MCPcounter Gene",
+    "epic_gene",                      "Epic Gene",
+    "immune_subtype_classifier_gene", "Immune Subtype Classifier Gene"
   )
 
   tbl <-

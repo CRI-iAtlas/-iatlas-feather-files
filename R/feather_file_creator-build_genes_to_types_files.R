@@ -43,6 +43,17 @@ build_genes <- function(){
     ) %>%
     tidyr::drop_na()
 
+  immune_subtype_classifier <- "syn26066271" %>%
+    iatlas.data::synapse_delimited_id_to_tbl(., delim = ",") %>%
+    dplyr::select("entrez" = "Entrez") %>%
+    dplyr::distinct() %>%
+    tidyr::drop_na() %>%
+    dplyr::mutate(
+      "entrez" = as.integer(.data$entrez),
+      "gene_type" = "immune_subtype_classifier_gene"
+    )
+
+
   wolf <- "syn22240714" %>%
     iatlas.data::synapse_delimited_id_to_tbl(.) %>%
     dplyr::select("entrez" = "Genes", "gene_type" = "GeneSet") %>%
@@ -89,7 +100,8 @@ build_genes <- function(){
       io_targets,
       potential_immunomodulators,
       extracellular_network,
-      cellimage_network
+      cellimage_network,
+      immune_subtype_classifier
     ) %>%
     dplyr::filter(entrez %in% genes$entrez)
 
