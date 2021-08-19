@@ -3,6 +3,7 @@ tcga_build_ecn_nodes_files <- function() {
   stratified_nodes <- "syn26067676" %>%
     synapse_feather_id_to_tbl() %>%
     dplyr::mutate("network" = "Extracellular Network") %>%
+    dplyr::filter(!stringr::str_detect(.data$tag, "NA:")) %>%
     dplyr::select("name", "network", "feature", "entrez", "score", "label", "dataset")
 
   iatlas.data::synapse_store_feather_file(

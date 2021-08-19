@@ -1,10 +1,11 @@
 tcga_build_ecn_nodes_to_tags_file <- function() {
 
-  stratified_nodes_to_tags <- get_tcga_stratified_extracellular_network_nodes_cached() %>%
-    dplyr::select("node" = "name", "tag", "tag_2") %>%
-    tidyr::pivot_longer(cols = -"node", values_to = "tag") %>%
-    dplyr::select(-"name") %>%
-    tidyr::drop_na()
+  stratified_nodes_to_tags <- "syn26067676" %>%
+    synapse_feather_id_to_tbl() %>%
+    dplyr::filter(!stringr::str_detect(.data$tag, "NA:")) %>%
+    dplyr::select("node" = "name", "tag") %>%
+    tidyr::separate_rows("tag", sep = ":")
+
 
   iatlas.data::synapse_store_feather_file(
     stratified_nodes_to_tags,
