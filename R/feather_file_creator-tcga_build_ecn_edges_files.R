@@ -2,7 +2,6 @@ tcga_build_ecn_edges_files <- function() {
 
   stratified_edges <- "syn26067672" %>%
     synapse_feather_id_to_tbl() %>%
-    dplyr::filter(!stringr::str_detect(.data$name, "NA")) %>%
     dplyr::select("name", "score", "node1", "node2")
 
   iatlas.data::synapse_store_feather_file(
